@@ -69,4 +69,13 @@ def get_data():
     file_main.close()
 
 if __name__ == '__main__':
-    get_data()
+    for i in range(1, 4):
+        name = 'info_' + str(i) + '.txt'
+        with open(name, 'r', encoding='windows-1251') as file_info:
+            for l in file_info:
+                result = re.finditer(r'Изготовитель системы:.*',l)
+                for i in  result:
+                    print(i)
+#
+#    get_data()
+#
