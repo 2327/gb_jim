@@ -15,13 +15,18 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/p2/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="99" column="22" selection-start-line="99" selection-start-column="22" selection-end-line="99" selection-end-column="22" />
+            <state relative-caret-position="414">
+              <caret line="99" column="59" selection-start-line="99" selection-start-column="59" selection-end-line="99" selection-end-column="59" />
               <folding>
                 <element signature="e#2738#2747#0" expanded="true" />
               </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/p2/order.json">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -58,6 +63,7 @@
         <option value="$PROJECT_DIR$/p2/info_4.txt" />
         <option value="$PROJECT_DIR$/p2/1.py" />
         <option value="$PROJECT_DIR$/p2/main_data.txt" />
+        <option value="$PROJECT_DIR$/p2/order.json" />
         <option value="$PROJECT_DIR$/p2/main.py" />
       </list>
     </option>
@@ -224,10 +230,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/p2/order.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/p2/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="99" column="22" selection-start-line="99" selection-start-column="22" selection-end-line="99" selection-end-column="22" />
+        <state relative-caret-position="414">
+          <caret line="99" column="59" selection-start-line="99" selection-start-column="59" selection-end-line="99" selection-end-column="59" />
           <folding>
             <element signature="e#2738#2747#0" expanded="true" />
           </folding>

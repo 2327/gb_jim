@@ -97,8 +97,9 @@ def write_order_to_json(item,quantity,price,buyer,date):
     order["buyer"] = buyer
     order["date"] = date
 
-    order = json.dumps(order)
-    print(json.loads(order))
+    order = json.dumps(order, indent = 4,  sort_keys = True)
+    with open('order.json', 'w') as json_file:
+        json.dump(order, json_file)
 
 if __name__ == '__main__':
 #    get_data()
