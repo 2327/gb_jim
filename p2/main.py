@@ -11,16 +11,20 @@
     поместить в него названия столбцов отчета в виде списка: «Изготовитель системы», «Название ОС», «Код продукта»,
     «Тип системы». Значения для этих столбцов также оформить в виде списка и поместить в файл main_data (также для
     каждого файла);
+
     Создать функцию write_to_csv(), в которую передавать ссылку на CSV-файл. В этой функции реализовать получение данных
     через вызов функции get_data(), а также сохранение подготовленных данных в соответствующий CSV-файл;
-    Проверить работу программы через вызов функции write_to_csv(). ### 2. Задание на закрепление знаний по модулю json.
+    Проверить работу программы через вызов функции write_to_csv(). ###
+
+2. Задание на закрепление знаний по модулю json.
      Есть файл orders в формате JSON с информацией о заказах. Написать скрипт, автоматизирующий его заполнение данными.
       Для этого:
     Создать функцию write_order_to_json(), в которую передается 5 параметров — товар (item), количество (quantity),
     цена (price), покупатель (buyer), дата (date). Функция должна предусматривать запись данных в виде словаря в файл
      orders.json. При записи данных указать величину отступа в 4 пробельных символа;
     Проверить работу программы через вызов функции write_order_to_json() с передачей в нее значений каждого параметра.
-    ### 3. Задание на закрепление знаний по модулю yaml. Написать скрипт, автоматизирующий сохранение данных в файле
+
+3. Задание на закрепление знаний по модулю yaml. Написать скрипт, автоматизирующий сохранение данных в файле
     YAML-формата. Для этого:
     Подготовить данные для записи в виде словаря, в котором первому ключу соответствует список, второму — целое число,
     третьему — вложенный словарь, где значение каждого ключа — это целое число с юникод-символом, отсутствующим в
@@ -36,23 +40,32 @@ os_prod_list = []
 os_name_list = []
 os_code_list = []
 os_type_list = []
-main_data = ['Изготовитель системы', 'Название ОС', 'Код продукта', 'Тип системы']
+main_data = []
 
 def get_data():
     with open('main_data.txt', 'w', encoding='utf-8') as file_main:
         for i in main_data:
             file_main.write(i + ', ')
-    file_main.close()
 
-    for i in range(1, 5):
+    for i in range(1, 4):
         name = 'info_' + str(i) + '.txt'
-        with open(name, 'r', encoding='utf-8') as file_info:
+        with open(name, 'r', encoding='windows-1251') as file_info:
             for l in file_info:
-                os_prod_list.append(l.split(',')[0])
-                os_name_list.append(l.split(',')[1])
-                os_code_list.append(l.split(',')[2])
-                os_type_list.append(l.split(',')[3])
-        file_info.close()
+                os_prod_find = re.findall(r'Изготовитель системы:.*',l)
+                if os_prod_find:
+                    os_prod_list.append(re.split(r'Изготовитель системы:\s+', os_prod_find[0])[1])
+
+                os_name_find = re.findall(r'Название ОС:.*',l)
+                if os_name_find:
+                    os_name_list.append(re.split(r'Название ОС:\s+', os_name_find[0])[1])
+
+                os_code_find = re.findall(r'Код продукта:.*',l)
+                if os_code_find:
+                    os_code_list.append(re.split(r'Код продукта:\s+', os_code_find[0])[1])
+
+                os_type_find = re.findall(r'Тип системы:.*',l)
+                if os_type_find:
+                    os_type_list.append(re.split(r'Тип системы:\s+', os_type_find[0])[1])
 
     main_data.append(os_prod_list)
     main_data.append(os_name_list)
@@ -60,22 +73,23 @@ def get_data():
     main_data.append(os_type_list)
 
     with open('main_data.txt', 'w', encoding='utf-8') as file_main:
-        for i in range(4, 8):
-            for j in range(len(main_data[i])-1):
-                file_main.write(main_data[i][j] + ',')
-            file_main.write(main_data[i][j])
-            file_main.write('\n')
+        j = 0
+        file_main.write('Изготовитель системы, ' + 'Название ОС, ' + 'Код продукта, ' + 'Тип системы' + '\n')
+        for j in range(len(main_data[i])):
+            for l in range(len(main_data[i])):
+                if l < len(main_data[i]) - 1:
+                    file_main.write(main_data[l][j] + ', ')
+                    l += l
+                else:
+                    file_main.write(main_data[l][j] + '\n')
 
-    file_main.close()
+
+#def write_to_csv():
+#
+
+def write_order_to_json(item,quantity,price,buyer,date):
+    print(item)
 
 if __name__ == '__main__':
-    for i in range(1, 4):
-        name = 'info_' + str(i) + '.txt'
-        with open(name, 'r', encoding='windows-1251') as file_info:
-            for l in file_info:
-                result = re.finditer(r'Изготовитель системы:.*',l)
-                for i in  result:
-                    print(i)
-#
 #    get_data()
-#
+    write_order_to_json(item=1,quantity=1,price=1,buyer=1,date=1)
