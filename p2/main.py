@@ -36,6 +36,8 @@
 """
 
 import re
+import json
+
 os_prod_list = []
 os_name_list = []
 os_code_list = []
@@ -88,7 +90,15 @@ def get_data():
 #
 
 def write_order_to_json(item,quantity,price,buyer,date):
-    print(item)
+    order = {}
+    order["item"] = item
+    order["quantity"] = quantity
+    order["price"] = price
+    order["buyer"] = buyer
+    order["date"] = date
+
+    order = json.dumps(order)
+    print(json.loads(order))
 
 if __name__ == '__main__':
 #    get_data()
