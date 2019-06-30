@@ -4,6 +4,7 @@ import sys
 import socket
 from functions import *
 import time
+from tests import *
 
 HOST = '127.0.0.1'
 PORT = 7777
@@ -81,4 +82,7 @@ def main(params):
     server.main_loop()
 
 if __name__ == '__main__':
+    test_actual_time()
+    test_convert_empty()
+    test_convert_dict()
     main(cmd_server(sys.argv))

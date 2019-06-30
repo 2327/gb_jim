@@ -4,6 +4,7 @@ import sys
 import socket
 from functions import *
 import time
+from tests import *
 
 HOST = '127.0.0.1'
 PORT = 7777

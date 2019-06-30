@@ -14,12 +14,12 @@ def convert(data):
         try:
             result = json.loads(data.decode(CODING))
         except TypeError:
-            print('1: wrong data format!')
+            print('wrong data format!')
     elif isinstance(data, dict):
         try:
             result = json.dumps(data).encode(CODING)
         except TypeError:
-            print('2: wrong data format!')
+            print('wrong data format!')
     else:
-        print('3: wrong data format!')
+        print('wrong data format!')
     return result
