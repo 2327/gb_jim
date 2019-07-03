@@ -1,5 +1,6 @@
 import json
 import time
+import logging
 
 CODING = 'utf-8'
 
@@ -23,3 +24,19 @@ def convert(data):
     else:
         print('wrong data format!')
     return result
+
+def show_log(byte_request, count):
+    pass
+
+'''    request = convert(byte_request)
+    account_name = request['user']['account_name']
+    time_unix = request['time']
+    time_ = act_time(time_unix)
+    print('connection # {} // request from {} // sent time {}\n'.format(count, account_name, time_))
+'''
+
+def init_log():
+    pass
+
+def write_log(msg):
+    pass

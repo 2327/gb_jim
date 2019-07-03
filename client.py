@@ -19,7 +19,23 @@ class Client:
     def __init__(self, host, port):
         self.address = (host, port)
         self.sock = socket.socket()
-        self.sock.connect(self.address)
+        while True:
+            try:
+                self.sock.connect(self.address)
+            except socket.error:
+                try:
+                    logging.info('Coldn\'t connect to server...')
+                    time.sleep(1)
+                except KeyboardInterrupt:
+                    logging.info('Ctrl+C detected. Exit.')
+                    print('\n', 'Ctrl+C detected. Exit.')
+                    self.sock.close()
+                    sys.exit()
+            except KeyboardInterrupt:
+                logging.info('Ctrl+C detected. Exit.')
+                print('\n', 'Ctrl+C detected. Exit.')
+                self.sock.close()
+                sys.exit()
 
     def send_request(self, request):
         byte_request = convert(request)
@@ -39,15 +55,18 @@ class Client:
 def cmd_client(params):
     host_ = HOST
     port_ = PORT
+
     if len(params) == 2:
         try:
             host, port = params[1].split('[')
             port = int(port[:-1])
+            logging.info('set default 127.0.0.1[', port, ']')
             return host, port
         except ValueError:
-            print('set default 127.0.0.1[7777]')
+            logging.info('set default 127.0.0.1[7777]')
             return host_, port_
     else:
+        logging.info('no arguments. set default ' +  host_ + '['+ str(port_) + ']')
         return host_, port_
 
 
@@ -62,4 +81,6 @@ def main(params):
     print(client.parse_response(response))
 
 if __name__ == '__main__':
+    logging.basicConfig(filename="client.log", format="%(levelname)-10s %(asctime)s %(message)s", level=logging.INFO)
+    logging.info('Application initialization...')
     main(cmd_client(sys.argv))
