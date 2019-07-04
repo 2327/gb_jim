@@ -20,12 +20,12 @@ class Server:
     def get_request(self,client):
         byte_request = client.recv(SIZE)
         request = convert(byte_request)
-        print(request)
+        logging.info('received message: ' + request)
         return byte_request
 
     def send_response(client, response):
         byte_response = convert(response)
-        print(byte_response)
+        logging.info('received message: ' + request)
         client.send(byte_response)
         client.close()
 
