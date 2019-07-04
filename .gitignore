@@ -1,4 +1,5 @@
-.idea
+.idea/
 *.txt
 *.log
 __pycache__
+log/*.log

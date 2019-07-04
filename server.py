@@ -2,9 +2,8 @@
 
 import sys
 import socket
-from functions import *
-import time
-from tests import *
+from tests.tests import *
+from server.server_log_config import *
 
 HOST = '127.0.0.1'
 PORT = 7777
@@ -79,10 +78,14 @@ def main(params):
     host = params[0]
     port = params[1]
     server = Server(host, port)
+    logging.info('no arguments. set default ' +  host + '['+ str(port) + ']')
     server.main_loop()
 
 if __name__ == '__main__':
+    ''' 
     test_actual_time()
     test_convert_empty()
     test_convert_dict()
+    '''
+    logging.debug('Application initialization...')
     main(cmd_server(sys.argv))

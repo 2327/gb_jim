@@ -2,9 +2,9 @@
 
 import sys
 import socket
-from functions import *
-import time
-from tests import *
+from tests.tests import *
+from client.client_log_config import *
+
 
 HOST = '127.0.0.1'
 PORT = 7777
@@ -78,9 +78,8 @@ def main(params):
     client = Client(host, port)
     client.send_request(presence)
     response = client.get_response()
-    print(client.parse_response(response))
+    logging.info(client.parse_response(response))
 
 if __name__ == '__main__':
-    logging.basicConfig(filename="client.log", format="%(levelname)-10s %(asctime)s %(message)s", level=logging.INFO)
-    logging.info('Application initialization...')
+    logging.debug('Application initialization...')
     main(cmd_client(sys.argv))
