@@ -44,22 +44,30 @@ class Client:
         byte_response = self.sock.recv(size)
         client_log.debug(f'Successfully receive message: {byte_response}')
         response = convert(byte_response)
+        '''
         self.sock.close()
         client_log.debug(f'Socket was closed.')
+        '''
         return response
 
     def parse_response(self, response):
-        code = response['response']
-        time_ = act_time(response['time'])
-        return 'code: {} - {}, time: {}'.format(code, CODES[code], time_)
+        client_log.info(f'Received response: {response}')
+
+        if 'response' in response and response['response'] == 200:
+            result = input('Enter your message: ')
+        else:
+            client_log.info(f'Something went wrong.')
+
+        return result
 
 def cmd_client(params):
-    host_ = HOST
-    port_ = PORT
     '''
     TODO: need to add log options for foreground and verbose
           nedd add ConfigParser for working with config file
     '''
+
+    host_ = HOST
+    port_ = PORT
 
     if len(params) == 2:
         try:
@@ -78,13 +86,22 @@ def cmd_client(params):
 def main(params):
     host = params[0]
     port = params[1]
-    presence = {"action": "presence", "2": "2"}
 
-    client = Client(host, port)
-    client.send_request(presence)
-    response = client.parse_response(client.get_response())
-    print(f'Received response: {response}')
-    client_log.info(response)
+    while True:
+        try:
+            '''
+            TODO: Тут вставить разбор, например, если ответ существует, то уже не посылать пресенсе...
+            '''
+            presence = {"action": "presence", "ip": "ip"}
+            client = Client(host, port)
+            client.send_request(presence)
+            response = client.parse_response(client.get_response())
+            request = {"action": "broadcast_message", "message": response}
+            client.send_request(request)
+        except KeyboardInterrupt:
+            server_log.info('Ctrl+C detected. Exit.')
+            sys.exit()
+
 
 if __name__ == '__main__':
     client_log.debug(f'Application initialization...')
