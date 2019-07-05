@@ -31,7 +31,7 @@ class Server:
         if 'action' in request and request['action'] == 'presence':
             response = {"response": 200,"time": time.time()}
         elif 'action' in request and request['action'] == 'broadcast_message':
-            response = {"response": 200, "time": time.time(), "message": broadcast_message}
+            response = {"response": 200, "time": time.time(), "message": request['message']}
         return response
 
     def send_response(self, client, response):

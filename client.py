@@ -97,9 +97,11 @@ def main(params):
             client.send_request(presence)
             response = client.parse_response(client.get_response())
             request = {"action": "broadcast_message", "message": response}
+            request = {"action": "broadcast_message", "message": "111"}
             client.send_request(request)
+
         except KeyboardInterrupt:
-            server_log.info('Ctrl+C detected. Exit.')
+            client_log.info('Ctrl+C detected. Exit.')
             sys.exit()
 
 
