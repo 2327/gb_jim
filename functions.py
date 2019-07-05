@@ -11,22 +11,20 @@ def act_time(time_):
 
 def convert(data):
     result = None
+    logger = logging.getLogger(__name__)
     if isinstance(data, bytes):
         try:
             result = json.loads(data.decode(CODING))
         except TypeError:
-            print('wrong data format!')
+            logger.info('wrong data format!')
     elif isinstance(data, dict):
         try:
             result = json.dumps(data).encode(CODING)
         except TypeError:
-            print('wrong data format!')
+            logger.info('wrong data format!')
     else:
-        print('wrong data format!')
+        logger.info('wrong data format!')
     return result
-
-def show_log(byte_request, count):
-    pass
 
 '''    request = convert(byte_request)
     account_name = request['user']['account_name']
@@ -36,6 +34,9 @@ def show_log(byte_request, count):
 '''
 
 def init_log():
+    pass
+
+def show_log(byte_request, count):
     pass
 
 def write_log(msg):

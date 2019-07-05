@@ -19,23 +19,24 @@ class Client:
     def __init__(self, host, port):
         self.address = (host, port)
         self.sock = socket.socket()
-        while True:
+        self.sock.connect(self.address)
+
+        try:
+            self.sock.connect(self.address)
+        except socket.error:
             try:
-                self.sock.connect(self.address)
-            except socket.error:
-                try:
-                    logging.info('Coldn\'t connect to server...')
-                    time.sleep(1)
-                except KeyboardInterrupt:
-                    logging.info('Ctrl+C detected. Exit.')
-                    print('\n', 'Ctrl+C detected. Exit.')
-                    self.sock.close()
-                    sys.exit()
+                client_log.info('Coldn\'t connect to server...')
+                time.sleep(1)
             except KeyboardInterrupt:
-                logging.info('Ctrl+C detected. Exit.')
+                client_log.info('Ctrl+C detected. Exit.')
                 print('\n', 'Ctrl+C detected. Exit.')
                 self.sock.close()
                 sys.exit()
+        except KeyboardInterrupt:
+            client_log.info('Ctrl+C detected. Exit.')
+            print('\n', 'Ctrl+C detected. Exit.')
+            self.sock.close()
+            sys.exit()
 
     def send_request(self, request):
         byte_request = convert(request)
@@ -60,13 +61,13 @@ def cmd_client(params):
         try:
             host, port = params[1].split('[')
             port = int(port[:-1])
-            logging.info('set default 127.0.0.1[', port, ']')
+            client_log.info('set default 127.0.0.1[', port, ']')
             return host, port
         except ValueError:
-            logging.info('set default 127.0.0.1[7777]')
+            client_log.info('set default 127.0.0.1[7777]')
             return host_, port_
     else:
-        logging.info('no arguments. set default ' +  host_ + '['+ str(port_) + ']')
+        client_log.info('no arguments. set default ' +  host_ + '['+ str(port_) + ']')
         return host_, port_
 
 
@@ -78,8 +79,8 @@ def main(params):
     client = Client(host, port)
     client.send_request(presence)
     response = client.get_response()
-    logging.info(client.parse_response(response))
+    client_log.info(client.parse_response(response))
 
 if __name__ == '__main__':
-    logging.debug('Application initialization...')
+    client_log.debug('Application initialization...')
     main(cmd_client(sys.argv))

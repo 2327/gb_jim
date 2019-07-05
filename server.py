@@ -20,12 +20,12 @@ class Server:
     def get_request(self,client):
         byte_request = client.recv(SIZE)
         request = convert(byte_request)
-        logging.info('received message: ' + request)
+        server_log.info('received message: ' + str(request))
         return byte_request
 
     def send_response(client, response):
         byte_response = convert(response)
-        logging.info('received message: ' + request)
+        server_log.info('received message: ' + str(request))
         client.send(byte_response)
         client.close()
 
@@ -78,14 +78,9 @@ def main(params):
     host = params[0]
     port = params[1]
     server = Server(host, port)
-    logging.info('no arguments. set default ' +  host + '['+ str(port) + ']')
+    server_log.info('no arguments. set default ' +  host + '['+ str(port) + ']')
     server.main_loop()
 
 if __name__ == '__main__':
-    ''' 
-    test_actual_time()
-    test_convert_empty()
-    test_convert_dict()
-    '''
-    logging.debug('Application initialization...')
+    server_log.debug('Application initialization...')
     main(cmd_server(sys.argv))
