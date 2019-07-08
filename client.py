@@ -23,8 +23,8 @@ class Client:
 
         while True:
             try:
-                client_log.debug(f'Successfully connected to server')
                 self.sock.connect(self.address)
+                client_log.debug(f'Successfully connected to server')
                 break
             except socket.error:
                 client_log.info('Coldn\'t connect to server...')
@@ -42,7 +42,7 @@ class Client:
 
     def get_response(self, size=SIZE):
         byte_response = self.sock.recv(size)
-        client_log.debug(f'Successfully receive message: {byte_response}')
+        client_log.debug(f'Successfully receive response: {byte_response}')
         response = convert(byte_response)
         '''
         self.sock.close()
@@ -51,7 +51,7 @@ class Client:
         return response
 
     def parse_response(self, response):
-        client_log.info(f'Received response: {response}')
+        client_log.info(f'Received message: {response}')
 
         if 'response' in response and response['response'] == 200:
             result = input('Enter your message: ')
@@ -60,6 +60,24 @@ class Client:
 
         return result
 
+functions = []
+
+def decolog(function):
+    functions.append(function.__name__)
+
+    if len(functions) > 1:
+        for num_func, func in enumerate(functions):
+            if func == function.__name__:
+                parent_func = functions[num_func-1]
+                client_log.info(f'Function {func} called from {parent_func}')
+    else:
+        func = function.__name__
+        client_log.info(f'Function {func} havent parent function')
+
+    return function
+
+
+@decolog
 def cmd_client(params):
     '''
     TODO: need to add log options for foreground and verbose
@@ -83,27 +101,25 @@ def cmd_client(params):
         return host_, port_
 
 
+@decolog
 def main(params):
     host = params[0]
     port = params[1]
 
     while True:
         try:
-            '''
-            TODO: Тут вставить разбор, например, если ответ существует, то уже не посылать пресенсе...
-            '''
+            response
+        except KeyboardInterrupt:
+            client_log.info('Ctrl+C detected. Exit.')
+            sys.exit()
+        except:
             presence = {"action": "presence", "ip": "ip"}
             client = Client(host, port)
             client.send_request(presence)
             response = client.parse_response(client.get_response())
-            request = {"action": "broadcast_message", "message": response}
-            request = {"action": "broadcast_message", "message": "111"}
-            client.send_request(request)
-
-        except KeyboardInterrupt:
-            client_log.info('Ctrl+C detected. Exit.')
-            sys.exit()
-
+        request = {"action": "broadcast_message", "message": response}
+        client.send_request(request)
+        print(client.parse_response(client.get_response()))
 
 if __name__ == '__main__':
     client_log.debug(f'Application initialization...')

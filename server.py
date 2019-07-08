@@ -2,6 +2,7 @@
 
 import os
 import sys
+import select
 import socket
 from tests.tests import *
 from server.server_log_config import *
@@ -40,30 +41,40 @@ class Server:
         ip_ = client_sock[1]
         try:
             client.send(byte_response)
-            server_log.info(f'Successfully send, IP: {ip_}')
+            server_log.info(f'Successfully send message. Client: {client_sock}')
             '''
             client.close()
             '''
             return True
         except socket.error:
-            server_log.info(f'Failed to send, IP: {ip_}')
+            server_log.info(f'Failed to send message. Client: {client_sock}')
 
     def main_loop(self):
-        count = 1
+        clients = []
+        clients_rx = []
+        clients_tx = []
         while True:
             try:
-                client, addr = self.sock.accept()
-                ip_ = client.getpeername()
-                server_log.info(f'connected {ip_}')
-                byte_request = self.get_request(client)
-                response = self.make_response(byte_request)
-                self.send_response(client, response)
-                server_log.info(f'Send response {response}')
-                count += 1
+                ip_
             except KeyboardInterrupt:
                 self.sock.close()
                 server_log.info('Ctrl+C detected. Exit.')
                 sys.exit()
+            except:
+                client, addr = self.sock.accept()
+                clients.append(client)
+                print(clients)
+                ip_ = client.getpeername()
+                server_log.info(f'Connected from {ip_}')
+
+            clients_rx, clients_tx, e = select.select(clients, clients, [], 0)
+            print(clients_rx, clients_tx, e)
+
+            byte_request = self.get_request(client)
+            response = self.make_response(byte_request)
+            self.send_response(client, response)
+            server_log.info(f'Send response {response}')
+
             '''
             TODO: make event for close socket            
             client.close()
