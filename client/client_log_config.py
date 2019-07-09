@@ -15,11 +15,5 @@ client_log_stdout = logging.StreamHandler()
 client_log_stdout.setFormatter(formatter)
 client_log.addHandler(client_log_stdout)
 
-try:
-    os.mkdir(LOG_PATH)
-except OSError:
-    client_log.debug('Creation of the directory {LOG_PATH} failed')
-else:
-    client_log.debug('Successfully created the directory {LOG_PATH}')
 
 
