@@ -4,7 +4,7 @@ from client.client_log_config import *
 functions = []
 log_msgs = []
 
-def decolog(function, log_msgs):
+def decolog(function):
     functions.append(function.__name__)
 
     if len(functions) > 1:

@@ -19,6 +19,7 @@ class Server:
         self.sock = socket.socket()
         self.sock.bind(self.address)
         self.sock.listen(que)
+        self.sock.settimeout(0.2)
 
     def get_request(self,client):
         byte_request = client.recv(SIZE)
@@ -51,34 +52,64 @@ class Server:
 
     def main_loop(self):
         clients = []
-        clients_rx = []
-        clients_tx = []
+
         while True:
+#            try:
+#                ip_
+#            except KeyboardInterrupt:
+#                self.sock.close()
+#                server_log.info('Ctrl+C detected. Exit.')
+#                sys.exit()
+#            except:
             try:
-                ip_
-            except KeyboardInterrupt:
-                self.sock.close()
-                server_log.info('Ctrl+C detected. Exit.')
-                sys.exit()
-            except:
                 client, addr = self.sock.accept()
+                print(f'10: {client}')
+            except OSError as e:
+                print('20:')
+                pass
+            else:
                 clients.append(client)
-                print(clients)
+                print(f'30: {clients}')
                 ip_ = client.getpeername()
                 server_log.info(f'Connected from {ip_}')
+            finally:
+               print('40:')
+               clients_rx = []
+               clients_tx = []
+               wait = 10
+#
+#                try:
+#                    clients_rx, clients_tx, e = select.select([], clients, [], wait)
+#                except Exception as e:
+#                    pass
+#
+            print(f'50: {clients_tx}')
+#
+#                for client_tx in clients_tx:
+#                    timestr = time.ctime(time.time()) + "\n"
+#
+#                print(f'3.1: {client_tx}')
 
-            clients_rx, clients_tx, e = select.select(clients, clients, [], 0)
-            print(clients_rx, clients_tx, e)
+#                try:
+#                    client_tx.send(timestr.encode('utf-8'))
+#                except:
+#                     clients_tx.remove(client_tx)
 
-            byte_request = self.get_request(client)
-            response = self.make_response(byte_request)
-            self.send_response(client, response)
-            server_log.info(f'Send response {response}')
+#                print('4: ', clients_rx, clients_tx, e)
+#
+#                if len(clients_tx) > 0:
+#                    print('5: ')
+#                    byte_request = self.get_request(clients_tx)
+#                    print('6: ')
+#                    response = self.make_response(byte_request)
+#                    print(f'7: {response}')
+#                    self.send_response(clients_rx, response)
+#                    server_log.info(f'Send response {response}')
 
-            '''
-            TODO: make event for close socket            
-            client.close()
-            '''
+#                '''
+#                TODO: make event for close socket
+#                client.close()
+#                '''
 
 def cmd_server(params):
     '''
