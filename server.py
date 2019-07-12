@@ -19,6 +19,7 @@ class Server:
         self.sock = socket.socket()
         self.sock.bind(self.address)
         self.sock.listen(que)
+        self.sock.setblocking(0)
         self.sock.settimeout(0.05)
 
     def get_request(self,client):
@@ -84,11 +85,11 @@ class Server:
                     response = self.make_response(byte_request)
                     self.send_response(client, response)
 
-            if clients_rx:
-                for client in clients_rx:
-                    response = self.make_response(byte_request)
-                    self.send_response(client, response)
-                    server_log.info(f'Send response {response}')
+#            if clients_rx:
+#                for client in clients_rx:
+#                    response = self.make_response(byte_request)
+#                    self.send_response(client, response)
+#                    server_log.info(f'Send response {response}')
 #                    client.close()
 
 def cmd_server(params):
