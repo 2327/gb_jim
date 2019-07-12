@@ -17,8 +17,8 @@ class Server:
     def __init__(self, host, port, que=5):
         self.address = (host, port)
         self.sock = socket.socket()
-        self.sock.setblocking(False)
-        self.sock.settimeout(0.5)
+        self.sock.setblocking(0)
+        self.sock.settimeout(1.0)
         self.sock.bind(self.address)
         self.sock.listen(que)
 
@@ -45,12 +45,9 @@ class Server:
         try:
             client.send(byte_response)
             server_log.info(f'Successfully send message. Client: {client_sock}')
-            '''
-            client.close()
-            '''
-            return True
         except socket.error:
             server_log.info(f'Failed to send message. Client: {client_sock}')
+        return True
 
     def main_loop(self):
         clients = []
@@ -58,8 +55,8 @@ class Server:
         while True:
             try:
                 client, addr = self.sock.accept()
-                ip_ = client.getpeername()
-                server_log.info(f'Connected from {ip_}')
+#                if client:
+#                    server_log.info(f'Connected from {client}')
             except OSError as e:
                 pass
             else:
@@ -68,7 +65,6 @@ class Server:
                 wait = 1
                 clients_rx = []
                 clients_tx = []
-
 
             try:
                 clients_rx, clients_tx, e = select.select(clients, clients, [], wait)
@@ -84,9 +80,10 @@ class Server:
                         print('3')
                         self.send_response(client, response)
                     except:
-                        print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                        all_clients.remove(sock)
-
+                        ip_ = client.getpeername()
+                        print(f'Клиент {ip_} отключился')
+                        clients.remove(client)
+                        clients_tx.remove(client)
 
             print(clients_rx, clients_tx)
 

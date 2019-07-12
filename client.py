@@ -36,11 +36,6 @@ def cmd_client(params):
 def main(params):
     host, port = params[0], params[1]
 
-    presence = {"action": "presence", "ip": "ip"}
-    client = Client(host, port)
-    client.send_request(presence)
-    print(client.get_response())
-
     while True:
         '''
         response = raw_input('Enter your message: ')
@@ -48,12 +43,19 @@ def main(params):
             request = {"action": "broadcast_message", "message": response}
             client.send_request(request)
         '''
+        presence = {"action": "presence", "ip": "ip"}
+        client = Client(host, port)
+        client.send_request(presence)
         print(client.get_response())
-        print('1')
+
+        response = client.get_response()
+        print(response)
+
 class Client:
     def __init__(self, host, port):
         self.address = (host, port)
         self.sock = socket.socket()
+        self.sock.settimeout(1)
 
         while True:
             try:
@@ -77,13 +79,16 @@ class Client:
 
     @decolog
     def get_response(self, size=SIZE):
-        byte_response = self.sock.recv(size)
-        client_log.debug(f'Successfully receive response: {byte_response}')
-        response = convert(byte_response)
-        '''
-        self.sock.close()
-        client_log.debug(f'Socket was closed.')
-        '''
+        try:
+            byte_response = self.sock.recv(size)
+            client_log.debug(f'Successfully receive response: {byte_response}')
+            response = convert(byte_response)
+        except OSError:
+            response = ''
+            print(f'get_response: {response}')
+            self.sock.close()
+            client_log.debug(f'Socket was closed.')
+
         return response
 
     @decolog
