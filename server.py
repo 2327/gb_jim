@@ -17,12 +17,13 @@ class Server:
     def __init__(self, host, port, que=5):
         self.address = (host, port)
         self.sock = socket.socket()
+        self.sock.setblocking(False)
+        self.sock.settimeout(0.5)
         self.sock.bind(self.address)
         self.sock.listen(que)
-        self.sock.setblocking(1)
-        self.sock.settimeout(0.05)
 
-    def get_request(self,client):
+
+    def get_request(self, client):
         byte_request = client.recv(SIZE)
         request = convert(byte_request)
         server_log.info(f'Received message: {request}')
@@ -76,11 +77,18 @@ class Server:
 
             if clients_tx:
                 for client in clients_tx:
-                    byte_request = self.get_request(client)
-                    response = self.make_response(byte_request)
-                    self.send_response(client, response)
+                    try:
+                        byte_request = self.get_request(client)
+                        print('2')
+                        response = self.make_response(byte_request)
+                        print('3')
+                        self.send_response(client, response)
+                    except:
+                        print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                        all_clients.remove(sock)
 
-            print('end')
+
+            print(clients_rx, clients_tx)
 
 
 #            if clients_rx:

@@ -45,8 +45,11 @@ def main(params):
     while True:
         request = {"action": "broadcast_message", "message": response}
         client.send_request(request)
-        response = client.parse_response(client.get_response())
-        print(f'Request: {request}. Response: {response}. ')
+
+#        message = client.get_response()
+#        if message:
+#            response = client.parse_response(message)
+#            print(f'Request: {request}. Response: {response}. ')
 
 class Client:
     def __init__(self, host, port):
