@@ -37,22 +37,16 @@ def main(params):
     host = params[0]
     port = params[1]
 
-    while True:
-        try:
-            response
-        except KeyboardInterrupt:
-            client_log.info('Ctrl+C detected. Exit.')
-            sys.exit()
-        except:
-            presence = {"action": "presence", "ip": "ip"}
-            client = Client(host, port)
-            client.send_request(presence)
-            response = client.parse_response(client.get_response())
+    presence = {"action": "presence", "ip": "ip"}
+    client = Client(host, port)
+    client.send_request(presence)
+    response = client.parse_response(client.get_response())
 
+    while True:
         request = {"action": "broadcast_message", "message": response}
         client.send_request(request)
-        print(client.parse_response(client.get_response()))
-
+        response = client.parse_response(client.get_response())
+        print(f'Request: {request}. Response: {response}. ')
 
 class Client:
     def __init__(self, host, port):

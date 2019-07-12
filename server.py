@@ -19,7 +19,7 @@ class Server:
         self.sock = socket.socket()
         self.sock.bind(self.address)
         self.sock.listen(que)
-        self.sock.setblocking(0)
+        self.sock.setblocking(1)
         self.sock.settimeout(0.05)
 
     def get_request(self,client):
@@ -59,10 +59,6 @@ class Server:
                 client, addr = self.sock.accept()
                 ip_ = client.getpeername()
                 server_log.info(f'Connected from {ip_}')
-            except KeyboardInterrupt:
-                self.sock.close()
-                server_log.info('Ctrl+C detected. Exit.')
-                sys.exit()
             except OSError as e:
                 pass
             else:
@@ -72,18 +68,20 @@ class Server:
                 clients_rx = []
                 clients_tx = []
 
+
             try:
                 clients_rx, clients_tx, e = select.select(clients, clients, [], wait)
             except:
                 pass
-
-            print(clients_rx, clients_tx, e)
 
             if clients_tx:
                 for client in clients_tx:
                     byte_request = self.get_request(client)
                     response = self.make_response(byte_request)
                     self.send_response(client, response)
+
+            print('end')
+
 
 #            if clients_rx:
 #                for client in clients_rx:
@@ -102,8 +100,7 @@ def cmd_server(params):
     return host, port
 
 def main(params):
-    host = params[0]
-    port = params[1]
+    host, port = params[0], params[1]
     server = Server(host, port)
     server_log.info(f'no arguments. set default {host} [{port}]')
     server.main_loop()
