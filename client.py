@@ -48,6 +48,7 @@ def main(params):
             client = Client(host, port)
             client.send_request(presence)
             response = client.parse_response(client.get_response())
+
         request = {"action": "broadcast_message", "message": response}
         client.send_request(request)
         print(client.parse_response(client.get_response()))
