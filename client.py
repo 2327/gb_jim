@@ -34,23 +34,22 @@ def cmd_client(params):
 
 @decolog
 def main(params):
-    host = params[0]
-    port = params[1]
+    host, port = params[0], params[1]
 
     presence = {"action": "presence", "ip": "ip"}
     client = Client(host, port)
     client.send_request(presence)
-    response = client.parse_response(client.get_response())
+    print(client.get_response())
 
     while True:
-        request = {"action": "broadcast_message", "message": response}
-        client.send_request(request)
-
-#        message = client.get_response()
-#        if message:
-#            response = client.parse_response(message)
-#            print(f'Request: {request}. Response: {response}. ')
-
+        '''
+        response = raw_input('Enter your message: ')
+        if response:
+            request = {"action": "broadcast_message", "message": response}
+            client.send_request(request)
+        '''
+        print(client.get_response())
+        print('1')
 class Client:
     def __init__(self, host, port):
         self.address = (host, port)
@@ -89,6 +88,9 @@ class Client:
 
     @decolog
     def parse_response(self, response):
+        '''
+        Parse message
+        '''
         client_log.info(f'Received message: {response}')
 
         if 'response' in response and response['response'] == 200:
