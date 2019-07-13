@@ -40,13 +40,14 @@ class Server:
 
     def send_response(self, client, response):
         byte_response = convert(response)
+        '''
         client_sock = client.getpeername()
         ip_ = client_sock[1]
+        '''
         try:
             client.send(byte_response)
-            server_log.info(f'Successfully send message. Client: {client_sock}')
         except socket.error:
-            server_log.info(f'Failed to send message. Client: {client_sock}')
+            pass
         return True
 
     def main_loop(self):
@@ -55,14 +56,15 @@ class Server:
         while True:
             try:
                 client, addr = self.sock.accept()
-#                if client:
-#                    server_log.info(f'Connected from {client}')
+                if client:
+                    ip_ = client.getpeername()
+                    server_log.info(f'Connected from {ip_}')
             except OSError as e:
                 pass
             else:
                 clients.append(client)
             finally:
-                wait = 1
+                wait = 0
                 clients_rx = []
                 clients_tx = []
 
@@ -71,37 +73,34 @@ class Server:
             except:
                 pass
 
-            if clients_tx:
-                for client in clients_tx:
-                    try:
-                        byte_request = self.get_request(client)
-                        print('2')
-                        response = self.make_response(byte_request)
-                        print('3')
-                        self.send_response(client, response)
-                    except:
-                        ip_ = client.getpeername()
-                        print(f'Клиент {ip_} отключился')
-                        clients.remove(client)
-                        clients_tx.remove(client)
+            print(f'WRITE: {clients_tx}, READ: {clients_rx}')
 
-            print(clients_rx, clients_tx)
+            for client in clients_tx:
+                try:
+                    byte_request = self.get_request(client)
+                except:
+                    print(f'Клиент отключился')
+                    clients.remove(client)
+                    clients_tx.remove(client)
 
+            for client in clients_rx:
+                try:
+                    response = self.make_response(byte_request)
+                    self.send_response(client, response)
+                    server_log.info(f'Send response {response}')
+                except:
+                    ip_ = client.getpeername()
+                    print(f'Клиент {ip_} отключился')
+                    #                        clients.remove(client)
+                    clients_rx.remove(client)
 
-#            if clients_rx:
-#                for client in clients_rx:
-#                    response = self.make_response(byte_request)
-#                    self.send_response(client, response)
-#                    server_log.info(f'Send response {response}')
-#                    client.close()
 
 def cmd_server(params):
     '''
     TODO: need to add log options for foreground and verbose
           nedd add ConfigParser for working with config file
     '''
-    host = HOST
-    port = PORT
+    host, port = HOST, PORT
     return host, port
 
 def main(params):

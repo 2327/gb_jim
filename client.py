@@ -15,8 +15,7 @@ def cmd_client(params):
           nedd add ConfigParser for working with config file
     '''
 
-    host_ = HOST
-    port_ = PORT
+    host_, port_ = HOST, PORT
 
     if len(params) == 2:
         try:
@@ -37,20 +36,17 @@ def main(params):
     host, port = params[0], params[1]
 
     while True:
-        '''
-        response = raw_input('Enter your message: ')
-        if response:
-            request = {"action": "broadcast_message", "message": response}
-            client.send_request(request)
-        '''
         presence = {"action": "presence", "ip": "ip"}
         client = Client(host, port)
         client.send_request(presence)
         print(client.get_response())
-
-        response = client.get_response()
-        print(response)
-
+        time.sleep(2)
+        '''
+        message = input('Enter your message: ')
+        if message:
+            request = {"action": "broadcast_message", "message": message}
+            client.send_request(request)
+        '''
 class Client:
     def __init__(self, host, port):
         self.address = (host, port)
