@@ -1,13 +1,7 @@
 import json
-import time
 import logging
+from common.config import *
 
-CODING = 'utf-8'
-
-def act_time(time_):
-    local_time = time.localtime(time_)
-    t = time.strftime('%d.%m.%Y - %H:%M:%S', local_time)
-    return t
 
 def convert(data):
     result = None

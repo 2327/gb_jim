@@ -1,4 +1,5 @@
-from functions import *
+from common.converters import *
+from common.formatters import *
 
 def test_actual_time():
     assert act_time(int('1561845014')) == '30.06.2019 - 00:50:14', 'test 1: Wrong operation time'

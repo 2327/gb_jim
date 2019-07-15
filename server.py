@@ -5,12 +5,68 @@ import sys
 import select
 import socket
 from tests.tests import *
+from client.client_log_config import *
 from server.server_log_config import *
+from common.jim_log import *
+from common.config import *
+import threading
+
 
 HOST = '127.0.0.1'
 PORT = 7777
 SIZE = 1024
 CODING = 'utf-8'
+
+
+class Client:
+    def __init__(self, host, port):
+        self.address = (host, port)
+        self.sock = socket.socket()
+
+        while True:
+            try:
+                self.sock.connect(self.address)
+                client_log.debug(f'Successfully connected to server')
+                break
+            except socket.error:
+                client_log.info('Coldn\'t connect to server...')
+                time.sleep(1)
+            except KeyboardInterrupt:
+                client_log.info('Ctrl+C detected. Exit.')
+                print('\n', 'Ctrl+C detected. Exit.')
+                self.sock.close()
+                sys.exit()
+
+    @decolog
+    def send_request(self, request):
+        byte_request = convert(request)
+        self.sock.send(byte_request)
+        client_log.debug(f'Successfully send message: {byte_request}')
+
+    @decolog
+    def get_response(self, size=SIZE):
+        byte_response = self.sock.recv(size)
+        client_log.debug(f'Successfully receive response: {byte_response}')
+        response = convert(byte_response)
+        '''
+        self.sock.close()
+        client_log.debug(f'Socket was closed.')
+        '''
+        return response
+
+    @decolog
+    def parse_response(self, response):
+        '''
+        Parse message
+        '''
+        client_log.info(f'Received message: {response}')
+
+        if 'response' in response and response['response'] == 200:
+            result = input('Enter your message: ')
+        else:
+            client_log.info(f'Something went wrong.')
+
+        return result
 
 
 class Server:
@@ -98,20 +154,61 @@ class Server:
 #                    server_log.info(f'Send response {response}')
 #                    client.close()
 
+
+@decolog
+def cmd_client(params):
+    '''
+    TODO: need to add log options for foreground and verbose
+          nedd add ConfigParser for working with config file
+    '''
+
+    host_ = HOST
+    port_ = PORT
+
+    if len(params) == 2:
+        try:
+            host, port = params[1].split('[')
+            port = int(port[:-1])
+            client_log.info(f'set default {host_} [{port}]')
+            return host, port
+        except ValueError:
+            client_log.info(f'no arguments. set default {host_} [{port_}]')
+            return host_, port_
+    else:
+        client_log.info(f'no arguments. set default {host_} [{port_}]')
+        return host_, port_
+
+
 def cmd_server(params):
     '''
     TODO: need to add log options for foreground and verbose
           nedd add ConfigParser for working with config file
     '''
-    host = HOST
-    port = PORT
+    host, port, mode = HOST, PORT, client
     return host, port
+
 
 def main(params):
     host, port = params[0], params[1]
-    server = Server(host, port)
-    server_log.info(f'no arguments. set default {host} [{port}]')
-    server.main_loop()
+    if mode == 'client':
+        presence = {"action": "presence", "ip": "ip"}
+        client = Client(host, port)
+        client.send_request(presence)
+        print(client.get_response())
+
+        while True:
+            '''
+            response = raw_input('Enter your message: ')
+            if response:
+                request = {"action": "broadcast_message", "message": response}
+                client.send_request(request)
+            '''
+            print(client.get_response())
+            print('1')
+    else:
+        server = Server(host, port)
+        server_log.info(f'no arguments. set default {host} [{port}]')
+        server.main_loop()
 
 if __name__ == '__main__':
     server_log.debug('Application initialization...')

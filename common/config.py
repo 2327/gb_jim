@@ -7,3 +7,4 @@ CODES = {100: 'Base', 101: 'Important',
          400: 'Wrong request', 401: 'Not authorized', 402: 'Wrong login/password',
          500: 'Server error'}
 LOG_PATH = 'log'
+CODING = 'utf-8'
