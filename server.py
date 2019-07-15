@@ -123,9 +123,7 @@ class Server:
                 clients.append(client)
             finally:
                 wait = 1
-                clients_rx = []
-                clients_tx = []
-
+                clients_rx, clients_tx = [], []
 
             try:
                 clients_rx, clients_tx, e = select.select(clients, clients, [], wait)
