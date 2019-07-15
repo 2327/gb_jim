@@ -19,55 +19,58 @@ CODING = 'utf-8'
 MODE = 'client'
 
 
-class Client:
-    def __init__(self, host, port):
-        self.address = (host, port)
-        self.sock = socket.socket()
-
-        while True:
-            try:
-                self.sock.connect(self.address)
-                client_log.debug(f'Successfully connected to server')
-                break
-            except socket.error:
-                client_log.info('Coldn\'t connect to server...')
-                time.sleep(1)
-            except KeyboardInterrupt:
-                client_log.info('Ctrl+C detected. Exit.')
-                print('\n', 'Ctrl+C detected. Exit.')
-                self.sock.close()
-                sys.exit()
-
-    @decolog
-    def send_request(self, request):
-        byte_request = convert(request)
-        self.sock.send(byte_request)
-        client_log.debug(f'Successfully send message: {byte_request}')
-
-    @decolog
-    def get_response(self, size=SIZE):
-        byte_response = self.sock.recv(size)
-        client_log.debug(f'Successfully receive response: {byte_response}')
-        response = convert(byte_response)
-        '''
-        self.sock.close()
-        client_log.debug(f'Socket was closed.')
-        '''
-        return response
-
-    @decolog
-    def parse_response(self, response):
-        '''
-        Parse message
-        '''
-        client_log.info(f'Received message: {response}')
-
-        if 'response' in response and response['response'] == 200:
-            result = input('Enter your message: ')
-        else:
-            client_log.info(f'Something went wrong.')
-
-        return result
+class Client:                                                                                                                                                                                                                    
+    def __init__(self, host, port):                                                                                                                                                                                              
+        self.address = (host, port)                                                                                                                                                                                              
+        self.sock = socket.socket()                                                                                                                                                                                              
+        self.sock.settimeout(1)                                                                                                                                                                                                  
+                                                                                                                                                                                                                                 
+        while True:                                                                                                                                                                                                              
+            try:                                                                                                                                                                                                                 
+                self.sock.connect(self.address)                                                                                                                                                                                  
+                client_log.debug(f'Successfully connected to server')                                                                                                                                                            
+                break                                                                                                                                                                                                            
+            except socket.error:                                                                                                                                                                                                 
+                client_log.info('Coldn\'t connect to server...')                                                                                                                                                                 
+                time.sleep(1)                                                                                                                                                                                                    
+            except KeyboardInterrupt:                                                                                                                                                                                            
+                client_log.info('Ctrl+C detected. Exit.')                                                                                                                                                                        
+                print('\n', 'Ctrl+C detected. Exit.')                                                                                                                                                                            
+                self.sock.close()                                                                                                                                                                                                
+                sys.exit()  
+                
+    @decolog                                                                                                                                                                                                                     
+    def send_request(self, request):                                                                                                                                                                                             
+        byte_request = convert(request)                                                                                                                                                                                          
+        self.sock.send(byte_request)                                                                                                                                                                                             
+        client_log.debug(f'Successfully send message: {byte_request}')                                                                                                                                                           
+                                                                                                                                                                                                                                 
+    @decolog                                                                                                                                                                                                                     
+    def get_response(self, size=SIZE):                                                                                                                                                                                           
+        try:                                                                                                                                                                                                                     
+            byte_response = self.sock.recv(size)                                                                                                                                                                                 
+            client_log.debug(f'Successfully receive response: {byte_response}')                                                                                                                                                  
+            response = convert(byte_response)                                                                                                                                                                                    
+        except OSError:                                                                                                                                                                                                          
+            response = ''                                                                                                                                                                                                        
+            self.sock.close()
+            client_log.debug(f'Socket was closed.')                                                                                                                                                                              
+                                                                                                                                                                                                                                 
+        return response                                                                                                                                                                                                          
+                                                                                                                                                                                                                                 
+    @decolog                                                                                                                                                                                                                     
+    def parse_response(self, response):                                                                                                                                                                                          
+        '''                                                                                                                                                                                                                      
+        Parse message                                                                                                                                                                                                            
+        '''                                                                                                                                                                                                                      
+        client_log.info(f'Received message: {response}')                                                                                                                                                                         
+                                                                                                                                                                                                                                 
+        if 'response' in response and response['response'] == 200:                                                                                                                                                               
+            result = input('Enter your message: ')                                                                                                                                                                               
+        else:                                                                                                                                                                                                                    
+            client_log.info(f'Something went wrong.')                                                                                                                                                                            
+                                                                                                                                                                                                                                 
+        return result  
 
 
 class Server:
@@ -109,49 +112,49 @@ class Server:
         except socket.error:
             server_log.info(f'Failed to send message. Client: {client_sock}')
 
-    def main_loop(self):
-        clients = []
-
-        while True:
-            try:
-                client, addr = self.sock.accept()
-                ip_ = client.getpeername()
-                server_log.info(f'Connected from {ip_}')
-            except OSError as e:
-                pass
-            else:
-                clients.append(client)
-            finally:
-                wait = 1
-                clients_rx, clients_tx = [], []
-
-            try:
-                clients_rx, clients_tx, e = select.select(clients, clients, [], wait)
-            except:
-                pass
-
-            if clients_tx:
-                for client in clients_tx:
-                    try:
-                        byte_request = self.get_request(client)
-                        print('2')
-                        response = self.make_response(byte_request)
-                        print('3')
-                        self.send_response(client, response)
-                    except:
-                        print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                        all_clients.remove(sock)
-
-
-            print(clients_rx, clients_tx)
-
-
-#            if clients_rx:
-#                for client in clients_rx:
-#                    response = self.make_response(byte_request)
-#                    self.send_response(client, response)
-#                    server_log.info(f'Send response {response}')
-#                    client.close()
+    def main_loop(self):                                                                                                                                                                                                         
+        clients = []                                                                                                                                                                                                             
+                                                                                                                                                                                                                                 
+        while True:                                                                                                                                                                                                              
+            try:                                                                                                                                                                                                                 
+                client, addr = self.sock.accept()                                                                                                                                                                                
+                if client:                                                                                                                                                                                                       
+                    ip_ = client.getpeername()                                                                                                                                                                                   
+                    server_log.info(f'Connected from {ip_}')                                                                                                                                                                     
+            except OSError as e:                                                                                                                                                                                                 
+                pass                                                                                                                                                                                                             
+            else:                                                                                                                                                                                                                
+                clients.append(client)                                                                                                                                                                                           
+            finally:                                                                                                                                                                                                             
+                wait = 0                                                                                                                                                                                                         
+                clients_rx = []                                                                                                                                                                                                  
+                clients_tx = []                                                                                                                                                                                                  
+                                                                                                                                                                                                                                 
+            try:                                                                                                                                                                                                                 
+                clients_rx, clients_tx, e = select.select(clients, clients, [], wait)                                                                                                                                            
+            except:                                                                                                                                                                                                              
+                pass                                                                                                                                                                                                             
+                                                                                                                                                                                                                                 
+            print(f'WRITE: {clients_tx}, READ: {clients_rx}')                                                                                                                                                                    
+                                                                                                                                                                                                                                 
+            for client in clients_tx:                                                                                                                                                                                            
+                try:                                                                                                                                                                                                             
+                    byte_request = self.get_request(client)                                                                                                                                                                      
+                except:                                                                                                                                                                                                          
+                    print(f'Клиент отключился')                                                                                                                                                                                  
+                    clients.remove(client)                                                                                                                                                                                       
+                    clients_tx.remove(client)                                                                                                                                                                                    
+                                                                                                                                                                                                                                 
+            for client in clients_rx:                                                                                                                                                                                            
+                try:                                                                                                                                                                                                             
+                    response = self.make_response(byte_request)                                                                                                                                                                  
+                    self.send_response(client, response)                                                                                                                                                                         
+                    server_log.info(f'Send response {response}')                                                                                                                                                                 
+                except:                                                                                                                                                                                                          
+                    ip_ = client.getpeername()                                                                                                                                                                                   
+                    print(f'Клиент {ip_} отключился')                                                                                                                                                                            
+                    #                        clients.remove(client)                                                                                                                                                              
+                    clients_rx.remove(client)
 
 
 @decolog
@@ -195,14 +198,12 @@ def main(params):
     host, port, mode = params[0], params[1], params[2]
 
     if mode == 'client':
-        presence = {"action": "presence", "ip": "ip"}
-        client = Client(host, port)
-        client.send_request(presence)
-        print(client.get_response())
-
         while True:
+            presence = {"action": "presence", "ip": "ip"}
+            client = Client(host, port)
+            client.send_request(presence)
             print(client.get_response())
-            print('1')
+            time.sleep(2)
     else:
         server = Server(host, port)
         server_log.info(f'no arguments. set default {host} [{port}]')
