@@ -75,44 +75,41 @@ class Client:
 
 class Server:
     def __init__(self, host, port, que=5):
-        self.address = (host, port)
-        self.sock = socket.socket()
+        self.address = (host, port)                                                                                                                                                                                              
+        self.sock = socket.socket()                                                                                                                                                                                              
         self.sock.setblocking(False)
-        self.sock.settimeout(0.5)
-        self.sock.bind(self.address)
-        self.sock.listen(que)
-
+        self.sock.settimeout(1.0)                                                                                                                                                                                                
+        self.sock.bind(self.address)                                                                                                                                                                                             
+        self.sock.listen(que)           
 
     def get_request(self, client):
-        byte_request = client.recv(SIZE)
-        request = convert(byte_request)
-        server_log.info(f'Received message: {request}')
-        return byte_request
+        byte_request = client.recv(SIZE)                                                                                                                                                                                         
+        request = convert(byte_request)                                                                                                                                                                                          
+        server_log.info(f'Received message: {request}')                                                                                                                                                                          
+        return byte_request                                                                                                                                                                                                      
 
     def make_response(self, byte_request):
-        request = convert(byte_request)
-        server_log.info(f'Received request {request}')
-        if 'action' in request and request['action'] == 'presence':
-            response = {"response": 200,"time": time.time()}
-        elif 'action' in request and request['action'] == 'broadcast_message':
-            response = {"response": 200, "time": time.time(), "message": request['message']}
-        return response
+        request = convert(byte_request)                                                                                                                                                                                          
+        server_log.info(f'Received request {request}')                                                                                                                                                                           
+        if 'action' in request and request['action'] == 'presence':                                                                                                                                                              
+            response = {"response": 200, "time": time.time()}
+        elif 'action' in request and request['action'] == 'broadcast_message':                                                                                                                                                   
+            response = {"response": 200, "time": time.time(), "message": request['message']}                                                                                                                                     
+        return response                                                                                                                                                                                                          
 
     def send_response(self, client, response):
-        byte_response = convert(response)
-        client_sock = client.getpeername()
-        ip_ = client_sock[1]
-        try:
-            client.send(byte_response)
-            server_log.info(f'Successfully send message. Client: {client_sock}')
-            '''
-            client.close()
-            '''
-            return True
-        except socket.error:
-            server_log.info(f'Failed to send message. Client: {client_sock}')
+        byte_response = convert(response)                                                                                                                                                                                        
+        '''                                                                                                                                                                                                                      
+        client_sock = client.getpeername()                                                                                                                                                                                       
+        ip_ = client_sock[1]                                                                                                                                                                                                     
+        '''                                                                                                                                                                                                                      
+        try:                                                                                                                                                                                                                     
+            client.send(byte_response)                                                                                                                                                                                           
+        except socket.error:                                                                                                                                                                                                     
+            pass                                                                                                                                                                                                                 
+        return True  
 
-    def main_loop(self):                                                                                                                                                                                                         
+    def main_loop(self):
         clients = []                                                                                                                                                                                                             
                                                                                                                                                                                                                                  
         while True:                                                                                                                                                                                                              
@@ -143,8 +140,10 @@ class Server:
                 except:                                                                                                                                                                                                          
                     print(f'Клиент отключился')                                                                                                                                                                                  
                     clients.remove(client)                                                                                                                                                                                       
-                    clients_tx.remove(client)                                                                                                                                                                                    
-                                                                                                                                                                                                                                 
+                    clients_tx.remove(client)
+
+            time.sleep(0.5)
+
             for client in clients_rx:                                                                                                                                                                                            
                 try:                                                                                                                                                                                                             
                     response = self.make_response(byte_request)                                                                                                                                                                  
@@ -154,7 +153,7 @@ class Server:
                     ip_ = client.getpeername()                                                                                                                                                                                   
                     print(f'Клиент {ip_} отключился')                                                                                                                                                                            
                     #                        clients.remove(client)                                                                                                                                                              
-                    clients_rx.remove(client)
+                    clients_rx.remove(client)        
 
 
 @decolog
@@ -174,12 +173,13 @@ def cmd_parseargs(params):
 
     if args.host == '127.0.0.1':
         HOST = args.host
-        client_log.info(f'set default {HOST} [{PORT}]')
+        client_log.info(f'set default {HOST}')
     else:
         HOST = '127.0.0.1'
 
     if args.host == 7777:
         PORT = args.port
+        client_log.info(f'set default {PORT}')
     else:
         PORT = 7777
 
