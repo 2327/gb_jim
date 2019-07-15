@@ -10,12 +10,13 @@ from server.server_log_config import *
 from common.jim_log import *
 from common.config import *
 import threading
-
+import argparse
 
 HOST = '127.0.0.1'
 PORT = 7777
 SIZE = 1024
 CODING = 'utf-8'
+MODE = 'client'
 
 
 class Client:
@@ -156,40 +157,45 @@ class Server:
 
 
 @decolog
-def cmd_client(params):
+def cmd_parseargs(params):
     '''
     TODO: need to add log options for foreground and verbose
           nedd add ConfigParser for working with config file
     '''
+    parser = argparse.ArgumentParser(description='JIM: my first messanger')
+    parser.add_argument('--verbose', help='verbose')
+    parser.add_argument('--host', action='store',  help='bind address')
+    parser.add_argument('--port', action='store', help='bind port')
+    parser.add_argument('--mode', action='store', help='mode')
+    args = parser.parse_args()
+    if args.verbose:
+        print('verbose mode')
 
-    host_ = HOST
-    port_ = PORT
-
-    if len(params) == 2:
-        try:
-            host, port = params[1].split('[')
-            port = int(port[:-1])
-            client_log.info(f'set default {host_} [{port}]')
-            return host, port
-        except ValueError:
-            client_log.info(f'no arguments. set default {host_} [{port_}]')
-            return host_, port_
+    if args.host == '127.0.0.1':
+        HOST = args.host
+        client_log.info(f'set default {HOST} [{PORT}]')
     else:
-        client_log.info(f'no arguments. set default {host_} [{port_}]')
-        return host_, port_
+        HOST = '127.0.0.1'
+
+    if args.host == 7777:
+        PORT = args.port
+    else:
+        PORT = 7777
+
+    if args.mode == 'server':
+        MODE = args.mode
+    else:
+        MODE = 'client'
+
+    host, port, mode = HOST, PORT, MODE
+
+    return host, port, mode
 
 
-def cmd_server(params):
-    '''
-    TODO: need to add log options for foreground and verbose
-          nedd add ConfigParser for working with config file
-    '''
-    host, port, mode = HOST, PORT, client
-    return host, port
-
-
+@decolog
 def main(params):
-    host, port = params[0], params[1]
+    host, port, mode = params[0], params[1], params[2]
+
     if mode == 'client':
         presence = {"action": "presence", "ip": "ip"}
         client = Client(host, port)
@@ -197,12 +203,6 @@ def main(params):
         print(client.get_response())
 
         while True:
-            '''
-            response = raw_input('Enter your message: ')
-            if response:
-                request = {"action": "broadcast_message", "message": response}
-                client.send_request(request)
-            '''
             print(client.get_response())
             print('1')
     else:
@@ -212,4 +212,4 @@ def main(params):
 
 if __name__ == '__main__':
     server_log.debug('Application initialization...')
-    main(cmd_server(sys.argv))
+    main(cmd_parseargs(sys.argv))
