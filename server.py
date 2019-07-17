@@ -11,6 +11,8 @@ from common.jim_log import *
 from common.config import *
 import threading
 import argparse
+import subprocess
+
 
 HOST = '127.0.0.1'
 PORT = 7777
@@ -110,8 +112,8 @@ class Server:
         return True  
 
     def main_loop(self):
-        clients = []                                                                                                                                                                                                             
-                                                                                                                                                                                                                                 
+        clients, coolected_responses = [], []
+
         while True:                                                                                                                                                                                                              
             try:                                                                                                                                                                                                                 
                 client, addr = self.sock.accept()                                                                                                                                                                                
@@ -144,11 +146,17 @@ class Server:
 
             time.sleep(0.5)
 
+            response = self.make_response(byte_request)
+            coolected_responses.append(response)
+
+# TODO: refactor
+
             for client in clients_rx:                                                                                                                                                                                            
-                try:                                                                                                                                                                                                             
-                    response = self.make_response(byte_request)                                                                                                                                                                  
-                    self.send_response(client, response)                                                                                                                                                                         
-                    server_log.info(f'Send response {response}')                                                                                                                                                                 
+                try:
+                    for coolected_response in coolected_responses:
+                        self.send_response(client, coolected_response)
+                        server_log.info(f'Send response {response}')
+                    coolected_responses = []
                 except:                                                                                                                                                                                                          
                     ip_ = client.getpeername()                                                                                                                                                                                   
                     print(f'Клиент {ip_} отключился')                                                                                                                                                                            
@@ -198,12 +206,21 @@ def main(params):
     host, port, mode = params[0], params[1], params[2]
 
     if mode == 'client':
+        c = 0
         while True:
-            presence = {"action": "presence", "ip": "ip"}
-            client = Client(host, port)
-            client.send_request(presence)
-            print(client.get_response())
-            time.sleep(2)
+            try:
+                presence
+                request = {"action": "broadcast_message", "message": c}
+                client = Client(host, port)
+                client.send_request(request)
+                time.sleep(1)
+                c += 1
+            except:
+                presence = {"action": "presence", "ip": "ip"}
+                client = Client(host, port)
+                client.send_request(presence)
+                print(client.get_response())
+                time.sleep(1)
     else:
         server = Server(host, port)
         server_log.info(f'no arguments. set default {host} [{port}]')
