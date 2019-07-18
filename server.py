@@ -24,8 +24,9 @@ MODE = 'client'
 class Client:                                                                                                                                                                                                                    
     def __init__(self, host, port):                                                                                                                                                                                              
         self.address = (host, port)                                                                                                                                                                                              
-        self.sock = socket.socket()                                                                                                                                                                                              
-        self.sock.settimeout(1)                                                                                                                                                                                                  
+        self.sock = socket.socket()
+        self.sock.setblocking(True)
+        self.sock.settimeout(1.0)
                                                                                                                                                                                                                                  
         while True:                                                                                                                                                                                                              
             try:                                                                                                                                                                                                                 
@@ -80,7 +81,7 @@ class Server:
     def __init__(self, host, port, que=5):
         self.address = (host, port)                                                                                                                                                                                              
         self.sock = socket.socket()                                                                                                                                                                                              
-        self.sock.setblocking(False)
+        self.sock.setblocking(True)
         self.sock.settimeout(1.0)                                                                                                                                                                                                
         self.sock.bind(self.address)                                                                                                                                                                                             
         self.sock.listen(que)           
@@ -99,16 +100,19 @@ class Server:
 
     def make_response(self, byte_request):
         request = convert(byte_request)
-#        server_log.info(f'Received request {request}')
+        server_log.info(f'Received request {request}')
         if 'action' in request and request['action'] == 'presence':
             response = {"response": 200, "time": time.time(), "action": request['action']}
         elif 'action' in request and request['action'] == 'broadcast_message':
             response = {"response": 200, "time": time.time(),
                         "action": request['action'], "message": request['message']}
+        else:
+            response = {"response": 200, "time": time.time(),
+                        "action": "error", "message": request['message']}
+
         return response
 
     def send_response(self, client, responses):
-        print('RAW: ', responses)
         byte_response = convert(responses)
         try:
             client.send(byte_response)
@@ -132,7 +136,7 @@ class Server:
             else:                                                                                                                                                                                                                
                 clients.append(client)                                                                                                                                                                                           
             finally:                                                                                                                                                                                                             
-                wait = 0                                                                                                                                                                                                         
+                wait = 0.2
                 clients_rx = []                                                                                                                                                                                                  
                 clients_tx = []                                                                                                                                                                                                  
                                                                                                                                                                                                                                  
@@ -144,27 +148,21 @@ class Server:
             for client in clients_tx:
                 try:
                     byte_request = self.get_request(client)
-                    print(byte_request)
                     if isinstance(byte_request, bytes):
-                        print(byte_request)
                         response = self.make_response(byte_request)
-                        print(response)
                         collected_responses.append(dict(response))
-                        print(collected_responses)
                 except:
-                    ip_ = client.getpeername()
-                    print(f'Sender was {ip_} disconnected.')
+                    print(f'Sender was disconnected.')
                     clients.remove(client)
                     clients_tx.remove(client)
-                    time.sleep(0.1)
-
 
             for client in clients_rx:
                 try:
                     self.send_response(client, collected_responses)
                     server_log.info(f'Send response {response}')
+                    clients_rx.remove(client)
                 except:
-                    ip_ = client.getpeername()                                                                                                                                                                                   
+                    ip_ = client.getpeername()
                     print(f'Reader was {ip_} disconnected.')
                     clients_rx.remove(client)
 
@@ -226,8 +224,6 @@ def main(params):
                 client = Client(host, port)
                 client.send_request(presence)
                 print('MSG: ', client.get_response())
-                client.sock.close()
-                time.sleep(1)
 
     else:
         server = Server(host, port)

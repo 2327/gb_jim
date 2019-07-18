@@ -13,9 +13,9 @@ server_log_file.setFormatter(formatter)
 server_log.setLevel(logging.DEBUG)
 server_log.addHandler(server_log_file)
 
-server_log_stdout = logging.StreamHandler()
-server_log_stdout.setFormatter(formatter)
-server_log.addHandler(server_log_stdout)
+#server_log_stdout = logging.StreamHandler()
+#server_log_stdout.setFormatter(formatter)
+#server_log.addHandler(server_log_stdout)
 
 try:
     os.mkdir(LOG_PATH)

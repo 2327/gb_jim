@@ -8,7 +8,6 @@ def convert(data):
     if isinstance(data, bytes):
         try:
             result = data.decode(CODING)
-            print('001:', result)
             if result == '':
                 result = dict({"action": "empty", "ip": "ip"})
             else:
@@ -23,9 +22,9 @@ def convert(data):
             logger.info('wrong data format!')
     elif isinstance(data, list):
         data = dict({"messages": data})
-        print(data)
         try:
             result = json.dumps(data).encode(CODING)
+            print('1', result, '\n')
         except TypeError:
             logger.info('wrong data format!')
     else:
