@@ -4,14 +4,26 @@ from common.config import *
 
 
 def convert(data):
-    result = None
     logger = logging.getLogger(__name__)
     if isinstance(data, bytes):
         try:
-            result = json.loads(data.decode(CODING))
+            result = data.decode(CODING)
+            print('001:', result)
+            if result == '':
+                result = dict({"action": "empty", "ip": "ip"})
+            else:
+                result = json.loads(result)
         except TypeError:
             logger.info('wrong data format!')
     elif isinstance(data, dict):
+        print('Converting message...')
+        try:
+            result = json.dumps(data).encode(CODING)
+        except TypeError:
+            logger.info('wrong data format!')
+    elif isinstance(data, list):
+        data = dict({"messages": data})
+        print(data)
         try:
             result = json.dumps(data).encode(CODING)
         except TypeError:
