@@ -98,7 +98,7 @@ def main(params):
             c += 1
     elif mode == 'write':
         presence = '0'
-        while c < 3:
+        while c < 15:
             client = Client(host, port)
             if presence == '0':
                 presence = {"action": "presence", "client": client_name, "message": c}

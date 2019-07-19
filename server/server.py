@@ -8,6 +8,8 @@ from server.server_log_config import *
 from common.jim_log import *
 from common.config import *
 
+clients, collected_responses = [], []
+
 class Server:
     def __init__(self, host, port, que=5):
         self.address = (host, port)
@@ -36,13 +38,20 @@ class Server:
     def get_requests(self, clients_tx, clients):
         for client in clients_tx:
             try:
-#                byte_request = self.get_request(client)
-#               b'{"action": "broadcast_message", "client": 68, "message": 1}
-#                response = self.make_response(convert(byte_request))
-                collected_responses.append({"action": "broadcast_message", "client": 68, "message": "0000000000000000000000000000000000000000000000000000000000000000000000000"}, client)
+                byte_request = self.get_request(client)
+                response = self.make_response(convert(byte_request))
+                collected_responses.append(response)
+                print('1', collected_responses)
+
+                return collected_responses
             except:
                 server_log.debug(f'Sender {client} was disconnected.')
                 clients.remove(client)
+
+            response = {"action": "broadcast_message", "client": "68", "message": "0000000000000000000000000000000000000000000000000000000000000000000000000"}
+            collected_responses.append(response)
+
+            return collected_responses
 
     def get_request(self, client):
         try:
@@ -76,8 +85,6 @@ class Server:
         return True
 
     def main_loop(self):
-        clients, collected_responses = [], []
-
         while True:
             try:
                 client, addr = self.sock.accept()
@@ -103,7 +110,7 @@ class Server:
                 except:
                     pass
 
+
                 collected_requests = self.get_requests(clients_tx, clients)
-                if collected_requests:
-                    print(collected_requests)
+                print(collected_requests)
                 self.send_responses(clients_rx, collected_requests)
