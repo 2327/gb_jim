@@ -46,7 +46,8 @@ class Client:
             client_log.debug('Trying receive response...')
             byte_response = self.sock.recv(size)
             client_log.debug(f'Successfully receive response: {byte_response}')
-            response = convert(byte_response)
+            #response = convert(byte_response)
+            response = byte_response
             print(f'You get message: {OKGREEN}{response}{ENDC}')
         except OSError:
             response = ''

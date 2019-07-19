@@ -48,7 +48,6 @@ class Server:
                 server_log.debug(f'Sender {client} was disconnected.')
                 clients.remove(client)
 
-            response = {"action": "broadcast_message", "client": "68", "message": "0000000000000000000000000000000000000000000000000000000000000000000000000"}
             collected_responses.append(response)
 
             return collected_responses
@@ -112,5 +111,6 @@ class Server:
 
 
                 collected_requests = self.get_requests(clients_tx, clients)
-                print(collected_requests)
+                if collected_requests:
+                    print(collected_requests)
                 self.send_responses(clients_rx, collected_requests)

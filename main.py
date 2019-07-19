@@ -72,9 +72,6 @@ def main(params):
                 presence
                 request = {"action": "broadcast_message", "client": client_name, "message": c}
                 client.send_request(request)
-#            if response['response'] == OK:
-#                t = threading.Thread(target=read_messages, args=(client, account_name))
-#                t.start()
                 print(client.get_response())
                 c += 1
             except:
@@ -86,30 +83,34 @@ def main(params):
                     read.start()
                 print('MSG: ', client.get_response())
     elif mode == 'read':
-        while True:
-            client = Client(host, port)
-            presence = {"action": "presence", "client": client_name, "message": c}
-            client.send_request(presence)
-            response = client.get_response()
-            if response['response'] == '200':
-                read = threading.Thread(target=client.get_response, args=())
-                read.start()
+        presence = '0'
+        presence = {"action": "presence", "client": client_name}
+        client = Client(host, port)
+        client.send_request(presence)
+        response = client.get_response()
 
+        while True:
+            print('Attempt receive messasge...')
+            print(client.get_response())
+#            read = threading.Thread(target=client.get_response, args=())
+#            read.start()
             c += 1
     elif mode == 'write':
         presence = '0'
-        while c < 15:
-            client = Client(host, port)
-            if presence == '0':
-                presence = {"action": "presence", "client": client_name, "message": c}
-                client.send_request(presence)
-                response = client.get_response()
-            else:
+        presence = {"action": "presence", "client": client_name}
+        client = Client(host, port)
+        client.send_request(presence)
+        response = client.get_response()
+
+        if 'action' in response and response['action'] == 'presence':
+            while c < 15:
                 request = {"action": "broadcast_message", "client": client_name, "message": c}
                 client.send_request(request)
                 print(client.get_response())
                 client.send_request(request)
-            c += 1
+                c += 1
+        else:
+            exit(0)
     else:
         server = Server(host, port)
         server_log.info(f'no arguments. set default {host} [{port}]')
