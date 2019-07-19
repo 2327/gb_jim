@@ -82,7 +82,7 @@ class Server:
         self.address = (host, port)                                                                                                                                                                                              
         self.sock = socket.socket()                                                                                                                                                                                              
         self.sock.setblocking(True)
-        self.sock.settimeout(1.0)                                                                                                                                                                                                
+        self.sock.settimeout(0.2)
         self.sock.bind(self.address)                                                                                                                                                                                             
         self.sock.listen(que)           
 
@@ -90,13 +90,11 @@ class Server:
         try:
             byte_request = client.recv(SIZE)
             request = convert(byte_request)
+            server_log.info(f'Received message: {request}')
             return byte_request
         except socket.error:
-            print('socket error')
+            server_log.info(f'Socket error {client}')
             pass
-
-#        server_log.info(f'Received message: {request}')
-
 
     def make_response(self, byte_request):
         request = convert(byte_request)
@@ -107,10 +105,25 @@ class Server:
             response = {"response": 200, "time": time.time(),
                         "action": request['action'], "message": request['message']}
         else:
-            response = {"response": 200, "time": time.time(),
-                        "action": "error", "message": request['message']}
-
+            if request:
+                response = {"response": 200, "time": time.time(),
+                            "action": "error", "message": request}
+            else:
+                response = {"response": 200, "time": time.time(),
+                            "action": "error", "message": "empty"}
         return response
+
+    def get_requests(self, clients_tx, clients):
+        for client in clients_tx:
+            try:
+                byte_request = self.get_request(client)
+                if isinstance(byte_request, bytes):
+                    response = self.make_response(byte_request)
+                    collected_responses.append(dict(response), client)
+            except:
+                print(f'Sender {client} was disconnected.')
+                clients.remove(client)
+                clients_tx.remove(client)
 
     def send_response(self, client, responses):
         byte_response = convert(responses)
@@ -122,6 +135,19 @@ class Server:
 
         return True  
 
+    def send_responses(self, clients_rx, collected_requests):
+        for client in clients_rx:
+            try:
+                self.send_response(client, collected_requests)
+                server_log.info(f'Send response')
+                clients_rx.remove(client)
+            except:
+                ip_ = client.getpeername()
+                print(f'Reader was {ip_} disconnected.')
+                clients_rx.remove(client)
+#        collected_responses = []
+        return True
+
     def main_loop(self):
         clients, collected_responses = [], []
 
@@ -130,43 +156,27 @@ class Server:
                 client, addr = self.sock.accept()                                                                                                                                                                                
                 if client:                                                                                                                                                                                                       
                     ip_ = client.getpeername()                                                                                                                                                                                   
-                    server_log.info(f'Connected from {ip_}')                                                                                                                                                                     
+                    server_log.info(f'Connected from {ip_}')
+                    byte_request = self.get_request(client)
+                    response = self.make_response(byte_request)
+                    self.send_response(client, response)
+                    server_log.info(f'Send presence {response}')
             except OSError as e:                                                                                                                                                                                                 
                 pass                                                                                                                                                                                                             
             else:                                                                                                                                                                                                                
                 clients.append(client)                                                                                                                                                                                           
             finally:                                                                                                                                                                                                             
-                wait = 0.2
+                wait = 0
                 clients_rx = []                                                                                                                                                                                                  
                 clients_tx = []                                                                                                                                                                                                  
                                                                                                                                                                                                                                  
             try:                                                                                                                                                                                                                 
                 clients_rx, clients_tx, e = select.select(clients, clients, [], wait)                                                                                                                                            
             except:                                                                                                                                                                                                              
-                pass                                                                                                                                                                                                             
+                pass
 
-            for client in clients_tx:
-                try:
-                    byte_request = self.get_request(client)
-                    if isinstance(byte_request, bytes):
-                        response = self.make_response(byte_request)
-                        collected_responses.append(dict(response))
-                except:
-                    print(f'Sender was disconnected.')
-                    clients.remove(client)
-                    clients_tx.remove(client)
-
-            for client in clients_rx:
-                try:
-                    self.send_response(client, collected_responses)
-                    server_log.info(f'Send response {response}')
-                    clients_rx.remove(client)
-                except:
-                    ip_ = client.getpeername()
-                    print(f'Reader was {ip_} disconnected.')
-                    clients_rx.remove(client)
-
-            collected_responses = []
+            collected_requests = self.get_requests(clients_tx, clients)
+            self.send_responses(clients_rx, collected_requests)
 
 
 @decolog
@@ -214,7 +224,7 @@ def main(params):
         c = 0
         while True:
             try:
-                presence1
+                presence
                 request = {"action": "broadcast_message", "message": c}
                 client.send_request(request)
                 print(client.get_response())
@@ -224,7 +234,15 @@ def main(params):
                 client = Client(host, port)
                 client.send_request(presence)
                 print('MSG: ', client.get_response())
-
+    elif mode == 'client_r':
+        while True:
+            print(client.get_response())
+            c += 1
+    elif mode == 'client_w':
+        while True:
+            request = {"action": "broadcast_message", "message": c}
+            client.send_request(request)
+            c += 1
     else:
         server = Server(host, port)
         server_log.info(f'no arguments. set default {host} [{port}]')

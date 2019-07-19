@@ -15,7 +15,6 @@ def convert(data):
         except TypeError:
             logger.info('wrong data format!')
     elif isinstance(data, dict):
-        print('Converting message...')
         try:
             result = json.dumps(data).encode(CODING)
         except TypeError:
@@ -24,11 +23,11 @@ def convert(data):
         data = dict({"messages": data})
         try:
             result = json.dumps(data).encode(CODING)
-            print('1', result, '\n')
         except TypeError:
             logger.info('wrong data format!')
     else:
         logger.info('wrong data format!')
+        result = json.dumps(dict({"action": "error", "message": "wrong format"})).encode(CODING)
     return result
 
 '''    request = convert(byte_request)
