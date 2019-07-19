@@ -102,13 +102,13 @@ def main(params):
         client.send_request(presence)
         response = client.get_response()
 
-        if 'action' in response and response['action'] == 'presence':
-            while c < 3:
-                request = {"action": "broadcast_message", "client": client_name, "message": c}
-                client.send_request(request)
-                print(client.get_response())
-                client.send_request(request)
-                c += 1
+#        if 'action' in response and response['action'] == 'presence':
+        while c < 3:
+            request = {"action": "broadcast_message", "client": client_name, "message": c}
+            client.send_request(request)
+            print(client.get_response())
+            client.send_request(request)
+            c += 1
         else:
             exit(0)
     else:

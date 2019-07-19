@@ -111,8 +111,10 @@ class Server:
 #                collected_requests = self.get_requests(clients_r, clients)
                 for client in clients_r:
                     byte_request = self.get_request(client)
-                    collected_responses.append(byte_request)
+#                    collected_responses.append(byte_request)
                     print('f: ', byte_request)
-                if collected_responses:
-                    print(collected_responses)
+#                if collected_responses:
+#                    print(collected_responses)
+                collected_responses=[{"response": 200, "time": time.time(),
+                            "action": "666", "message": "666"}]
                 self.send_responses(clients_w, collected_responses)
