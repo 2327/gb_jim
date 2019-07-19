@@ -12,23 +12,12 @@ class Server:
     def __init__(self, host, port, que=5):
         self.address = (host, port)
         self.sock = socket.socket()
-        self.sock.setblocking(True)
+        self.sock.setblocking(False)
         self.sock.settimeout(0.2)
         self.sock.bind(self.address)
         self.sock.listen(que)
 
-    def get_request(self, client):
-        try:
-            byte_request = client.recv(SIZE)
-            request = convert(byte_request)
-            server_log.info(f'Received message: {request}')
-            return byte_request
-        except socket.error:
-            server_log.info(f'Socket error {client}')
-            pass
-
-    def make_response(self, byte_request):
-        request = convert(byte_request)
+    def make_response(self, request):
         server_log.info(f'Received request {request}')
         if 'action' in request and request['action'] == 'presence':
             response = {"response": 200, "time": time.time(), "action": request['action']}
@@ -55,6 +44,14 @@ class Server:
                 print(f'Sender {client} was disconnected.')
                 clients.remove(client)
                 clients_tx.remove(client)
+
+    def get_request(self, client):
+        try:
+            byte_request = client.recv(SIZE)
+        except socket.error:
+            server_log.info(f'Socket error {client}')
+            byte_request = None
+        return byte_request
 
     def send_response(self, client, responses):
         byte_response = convert(responses)
@@ -88,8 +85,9 @@ class Server:
                 if client:
                     ip_ = client.getpeername()
                     server_log.info(f'Connected from {ip_}')
-                    byte_request = self.get_request(client)
-                    response = self.make_response(byte_request)
+                    request = convert(self.get_request(client))
+                    server_log.info(f'Received message: {request}')
+                    response = self.make_response(request)
                     self.send_response(client, response)
                     server_log.info(f'Send presence {response}')
             except OSError as e:

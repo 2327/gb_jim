@@ -65,29 +65,50 @@ def main(params):
     host, port, mode = params[0], params[1], params[2]
 
     c = 0
+    client_name = random.randint(1,101)
     if mode == 'client':
         while c < 10:
             try:
                 presence
-                request = {"action": "broadcast_message", "message": c}
+                request = {"action": "broadcast_message", "client": client_name, "message": c}
                 client.send_request(request)
+#            if response['response'] == OK:
+#                t = threading.Thread(target=read_messages, args=(client, account_name))
+#                t.start()
                 print(client.get_response())
                 c += 1
             except:
-                presence = {"action": "presence", "ip": "ip"}
+                presence = {"action": "presence", "client": client_name}
                 client = Client(host, port)
                 client.send_request(presence)
+                if response['response'] == 200:
+                    read = threading.Thread(target=client.get_response, args=())
+                    read.start()
                 print('MSG: ', client.get_response())
     elif mode == 'read':
-        while c < 10:
+        while True:
             client = Client(host, port)
-            print('Message: ', client.get_response())
+            presence = {"action": "presence", "client": client_name, "message": c}
+            client.send_request(presence)
+            response = client.get_response()
+            if response['response'] == '200':
+                read = threading.Thread(target=client.get_response, args=())
+                read.start()
+
             c += 1
     elif mode == 'write':
-        while c < 10:
-            request = {"action": "broadcast_message", "message": c}
+        presence = '0'
+        while c < 100:
             client = Client(host, port)
-            client.send_request(request)
+            if presence == '0':
+                presence = {"action": "presence", "client": client_name, "message": c}
+                client.send_request(presence)
+                response = client.get_response()
+            else:
+                print('666')
+                request = {"action": "broadcast_message", "client": client_name, "message": c}
+                client.send_request(request)
+                print(client.get_response())
             c += 1
     else:
         server = Server(host, port)
