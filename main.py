@@ -67,7 +67,7 @@ def main(params):
     c = 0
     client_name = random.randint(1,101)
     if mode == 'client':
-        while c < 10:
+        while True:
             try:
                 presence
                 request = {"action": "broadcast_message", "client": client_name, "message": c}
@@ -98,17 +98,17 @@ def main(params):
             c += 1
     elif mode == 'write':
         presence = '0'
-        while c < 100:
+        while c < 3:
             client = Client(host, port)
             if presence == '0':
                 presence = {"action": "presence", "client": client_name, "message": c}
                 client.send_request(presence)
                 response = client.get_response()
             else:
-                print('666')
                 request = {"action": "broadcast_message", "client": client_name, "message": c}
                 client.send_request(request)
                 print(client.get_response())
+                client.send_request(request)
             c += 1
     else:
         server = Server(host, port)

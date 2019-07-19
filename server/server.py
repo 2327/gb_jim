@@ -18,7 +18,7 @@ class Server:
         self.sock.listen(que)
 
     def make_response(self, request):
-        server_log.info(f'Received request {request}')
+        server_log.debug(f'Received request {request}')
         if 'action' in request and request['action'] == 'presence':
             response = {"response": 200, "time": time.time(), "action": request['action']}
         elif 'action' in request and request['action'] == 'broadcast_message':
@@ -36,20 +36,19 @@ class Server:
     def get_requests(self, clients_tx, clients):
         for client in clients_tx:
             try:
-                byte_request = self.get_request(client)
-                if isinstance(byte_request, bytes):
-                    response = self.make_response(byte_request)
-                    collected_responses.append(dict(response), client)
+#                byte_request = self.get_request(client)
+#               b'{"action": "broadcast_message", "client": 68, "message": 1}
+#                response = self.make_response(convert(byte_request))
+                collected_responses.append({"action": "broadcast_message", "client": 68, "message": "0000000000000000000000000000000000000000000000000000000000000000000000000"}, client)
             except:
-                print(f'Sender {client} was disconnected.')
+                server_log.debug(f'Sender {client} was disconnected.')
                 clients.remove(client)
-                clients_tx.remove(client)
 
     def get_request(self, client):
         try:
             byte_request = client.recv(SIZE)
         except socket.error:
-            server_log.info(f'Socket error {client}')
+            server_log.debug(f'Socket error {client}')
             byte_request = None
         return byte_request
 
@@ -67,7 +66,7 @@ class Server:
         for client in clients_rx:
             try:
                 self.send_response(client, collected_requests)
-                server_log.info(f'Send response')
+                server_log.debug(f'Send response')
                 clients_rx.remove(client)
             except:
                 ip_ = client.getpeername()
@@ -82,14 +81,14 @@ class Server:
         while True:
             try:
                 client, addr = self.sock.accept()
-                if client:
-                    ip_ = client.getpeername()
-                    server_log.info(f'Connected from {ip_}')
-                    request = convert(self.get_request(client))
-                    server_log.info(f'Received message: {request}')
-                    response = self.make_response(request)
-                    self.send_response(client, response)
-                    server_log.info(f'Send presence {response}')
+                ip_ = client.getpeername()
+                server_log.debug(f'Connected from {ip_}')
+                request = convert(self.get_request(client))
+                server_log.debug(f'Received message: {request}')
+                response = self.make_response(request)
+                self.send_response(client, response)
+                server_log.debug(f'Send presence {response}')
+
             except OSError as e:
                 pass
             else:
@@ -99,10 +98,12 @@ class Server:
                 clients_rx = []
                 clients_tx = []
 
-            try:
-                clients_rx, clients_tx, e = select.select(clients, clients, [], wait)
-            except:
-                pass
+                try:
+                    clients_tx, clients_rx, e = select.select(clients, clients, [], wait)
+                except:
+                    pass
 
-            collected_requests = self.get_requests(clients_tx, clients)
-            self.send_responses(clients_rx, collected_requests)
+                collected_requests = self.get_requests(clients_tx, clients)
+                if collected_requests:
+                    print(collected_requests)
+                self.send_responses(clients_rx, collected_requests)

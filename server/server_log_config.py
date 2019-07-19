@@ -10,7 +10,7 @@ server_log = logging.getLogger('server_log')
 
 server_log_file = logging.FileHandler(f'log/server-{loddate}.log')
 server_log_file.setFormatter(formatter)
-server_log.setLevel(logging.DEBUG)
+server_log.setLevel(logging.INFO)
 server_log.addHandler(server_log_file)
 
 server_log_stdout = logging.StreamHandler()
