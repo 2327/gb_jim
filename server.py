@@ -206,7 +206,7 @@ def cmd_parseargs(params):
     else:
         PORT = 7777
 
-    if args.mode == 'server':
+    if args.mode == 'server' or args.mode == 'read' or args.mode == 'write':
         MODE = args.mode
     else:
         MODE = 'client'
@@ -220,9 +220,9 @@ def cmd_parseargs(params):
 def main(params):
     host, port, mode = params[0], params[1], params[2]
 
+    c = 0
     if mode == 'client':
-        c = 0
-        while True:
+        while c < 10:
             try:
                 presence
                 request = {"action": "broadcast_message", "message": c}
@@ -234,13 +234,15 @@ def main(params):
                 client = Client(host, port)
                 client.send_request(presence)
                 print('MSG: ', client.get_response())
-    elif mode == 'client_r':
-        while True:
-            print(client.get_response())
+    elif mode == 'read':
+        while c < 10:
+            client = Client(host, port)
+            print('Message: ', client.get_response())
             c += 1
-    elif mode == 'client_w':
-        while True:
+    elif mode == 'write':
+        while c < 10:
             request = {"action": "broadcast_message", "message": c}
+            client = Client(host, port)
             client.send_request(request)
             c += 1
     else:
