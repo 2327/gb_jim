@@ -35,14 +35,14 @@ class Server:
                             "action": "error", "message": "empty"}
         return response
 
-    def get_requests(self, clients_tx, clients):
-        for client in clients_tx:
+    def get_requests(self, clients_r, clients):
+        for client in clients_r:
+            print(client)
             try:
                 byte_request = self.get_request(client)
+                print('f: ', byte_request)
                 response = self.make_response(convert(byte_request))
                 collected_responses.append(response)
-                print('1', collected_responses)
-
                 return collected_responses
             except:
                 server_log.debug(f'Sender {client} was disconnected.')
@@ -55,10 +55,10 @@ class Server:
     def get_request(self, client):
         try:
             byte_request = client.recv(SIZE)
+            print('t: ', byte_request)
+            return byte_request
         except socket.error:
             server_log.debug(f'Socket error {client}')
-            byte_request = None
-        return byte_request
 
     def send_response(self, client, responses):
         byte_response = convert(responses)
@@ -88,29 +88,31 @@ class Server:
             try:
                 client, addr = self.sock.accept()
                 ip_ = client.getpeername()
-                server_log.debug(f'Connected from {ip_}')
                 request = convert(self.get_request(client))
                 server_log.debug(f'Received message: {request}')
                 response = self.make_response(request)
                 self.send_response(client, response)
                 server_log.debug(f'Send presence {response}')
-
             except OSError as e:
                 pass
             else:
+                server_log.debug(f'Connected from {ip_}')
                 clients.append(client)
             finally:
                 wait = 0
-                clients_rx = []
-                clients_tx = []
-
+                clients_r = []
+                clients_w = []
                 try:
-                    clients_tx, clients_rx, e = select.select(clients, clients, [], wait)
+                    clients_r, clients_w, e = select.select(clients, clients, [], wait)
                 except:
                     pass
 
 
-                collected_requests = self.get_requests(clients_tx, clients)
-                if collected_requests:
-                    print(collected_requests)
-                self.send_responses(clients_rx, collected_requests)
+#                collected_requests = self.get_requests(clients_r, clients)
+                for client in clients_r:
+                    byte_request = self.get_request(client)
+                    collected_responses.append(byte_request)
+                    print('f: ', byte_request)
+                if collected_responses:
+                    print(collected_responses)
+                self.send_responses(clients_w, collected_responses)

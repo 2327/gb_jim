@@ -89,7 +89,7 @@ def main(params):
         client.send_request(presence)
         response = client.get_response()
 
-        while True:
+        while c < 15:
             print('Attempt receive messasge...')
             print(client.get_response())
 #            read = threading.Thread(target=client.get_response, args=())
@@ -103,7 +103,7 @@ def main(params):
         response = client.get_response()
 
         if 'action' in response and response['action'] == 'presence':
-            while c < 15:
+            while c < 3:
                 request = {"action": "broadcast_message", "client": client_name, "message": c}
                 client.send_request(request)
                 print(client.get_response())
