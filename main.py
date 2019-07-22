@@ -96,19 +96,20 @@ def main(params):
 #            read.start()
             c += 1
     elif mode == 'write':
-        presence = '0'
-        presence = {"action": "presence", "client": client_name}
-        client = Client(host, port)
-        client.get_connect()
-        client.send_request(presence)
-        response = client.get_response()
+#        presence = '0'
+#        presence = {"action": "presence", "client": client_name}
+#        client = Client(host, port)
+#        client.get_connect()
+#        client.send_request(presence)
+#        response = client.get_response()
 
 #        if 'action' in response and response['action'] == 'presence':
         while c < 3:
             request = {"action": "broadcast_message", "client": client_name, "message": c}
+            client = Client(host, port)
+            client.get_connect()
             client.send_request(request)
             print(client.get_response())
-            client.send_request(request)
             c += 1
         else:
             exit(0)

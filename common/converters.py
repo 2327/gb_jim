@@ -9,7 +9,8 @@ def convert(data):
         try:
             result = data.decode(CODING)
             if result == '':
-                result = dict({"action": "empty", "message": "received nothing..."})
+                result = 'empty'
+#                result = dict({"action": "empty", "message": "received nothing..."})
             else:
                 result = json.loads(result)
         except TypeError:

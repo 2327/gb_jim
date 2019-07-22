@@ -55,7 +55,6 @@ class Server:
     def get_request(self, client):
         try:
             byte_request = client.recv(SIZE)
-            print('t: ', byte_request)
             return byte_request
         except socket.error:
             server_log.debug(f'Socket error {client}')
@@ -77,8 +76,8 @@ class Server:
                 server_log.debug(f'Send response')
                 clients_rx.remove(client)
             except:
-                ip_ = client.getpeername()
-                print(f'Reader was {ip_} disconnected.')
+#                ip_ = client.getpeername()
+                print(f'Reader was disconnected.')
                 clients_rx.remove(client)
         #        collected_responses = []
         return True
@@ -89,6 +88,7 @@ class Server:
                 client, addr = self.sock.accept()
                 ip_ = client.getpeername()
                 request = convert(self.get_request(client))
+                print('DDD: ', request)
                 server_log.debug(f'Received message: {request}')
                 response = self.make_response(request)
                 self.send_response(client, response)
@@ -110,11 +110,12 @@ class Server:
 
 #                collected_requests = self.get_requests(clients_r, clients)
                 for client in clients_r:
-                    byte_request = self.get_request(client)
-#                    collected_responses.append(byte_request)
-                    print('receive request: ', byte_request)
+                    byte_request = convert(self.get_request(client))
+                    if byte_request != 'empty':
+                        collected_responses.append(byte_request)
+                        print('receive request: ', collected_responses)
 #                if collected_responses:
 #                    print(collected_responses)
-                collected_responses=[{"response": 200, "time": time.time(),
-                            "action": "666", "message": "666"}]
+#                collected_responses=[{"response": 200, "time": time.time(),
+#                            "action": "666", "message": "666"}]
                 self.send_responses(clients_w, collected_responses)
