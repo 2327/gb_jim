@@ -16,8 +16,11 @@ import random
 class Client:
     def __init__(self, host, port):
         self.address = (host, port)
+
+    @decolog
+    def get_connect(self):
         self.sock = socket.socket()
-        self.sock.setblocking(False)
+        self.sock.setblocking(True)
         self.sock.settimeout(2)
 
         while True:

@@ -99,6 +99,7 @@ def main(params):
         presence = '0'
         presence = {"action": "presence", "client": client_name}
         client = Client(host, port)
+        client.get_connect()
         client.send_request(presence)
         response = client.get_response()
 

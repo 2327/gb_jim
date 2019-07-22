@@ -112,7 +112,7 @@ class Server:
                 for client in clients_r:
                     byte_request = self.get_request(client)
 #                    collected_responses.append(byte_request)
-                    print('f: ', byte_request)
+                    print('receive request: ', byte_request)
 #                if collected_responses:
 #                    print(collected_responses)
                 collected_responses=[{"response": 200, "time": time.time(),
