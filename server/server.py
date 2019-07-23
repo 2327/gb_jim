@@ -87,12 +87,12 @@ class Server:
             try:
                 client, addr = self.sock.accept()
                 ip_ = client.getpeername()
-                request = convert(self.get_request(client))
-                print('DDD: ', request)
-                server_log.debug(f'Received message: {request}')
-                response = self.make_response(request)
-                self.send_response(client, response)
-                server_log.debug(f'Send presence {response}')
+#                request = convert(self.get_request(client))
+#                print('DDD: ', request)
+#                server_log.debug(f'Received message: {request}')
+#                response = self.make_response(request)
+#                self.send_response(client, response)
+#                server_log.debug(f'Send presence {response}')
             except OSError as e:
                 pass
             else:

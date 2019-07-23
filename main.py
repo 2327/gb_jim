@@ -83,14 +83,16 @@ def main(params):
                     read.start()
                 print('MSG: ', client.get_response())
     elif mode == 'read':
-        presence = '0'
-        presence = {"action": "presence", "client": client_name}
-        client = Client(host, port)
-        client.send_request(presence)
-        response = client.get_response()
+#        presence = '0'
+#        presence = {"action": "presence", "client": client_name}
+#        client = Client(host, port)
+#        client.send_request(presence)
+#        response = client.get_response()
 
-        while c < 15:
+        while True:
             print('Attempt receive messasge...')
+            client = Client(host, port)
+            client.get_connect()
             print(client.get_response())
 #            read = threading.Thread(target=client.get_response, args=())
 #            read.start()
@@ -104,7 +106,7 @@ def main(params):
 #        response = client.get_response()
 
 #        if 'action' in response and response['action'] == 'presence':
-        while c < 3:
+        while c < 30:
             request = {"action": "broadcast_message", "client": client_name, "message": c}
             client = Client(host, port)
             client.get_connect()
