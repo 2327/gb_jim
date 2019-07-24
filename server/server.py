@@ -7,9 +7,45 @@ from client.client_log_config import *
 from server.server_log_config import *
 from common.jim_log import *
 from common.config import *
-from metaclasses import ServerMaker
+import sqlite3
 
 clients, collected_responses = [], []
+sqlfile = os.path.join(os.path.dirname(__file__), "bazon.sqlite3")
+
+
+class Port:
+    def __set__(self, instance, value):
+        if not 1023 < value < 65536:
+            logger.critical(
+                f'Попытка запуска с указанием неподходящего порта {value}. Допустимы адреса с 1024 до 65535.')
+            exit(1)
+        instance.__dict__[self.name] = value
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+class Storage:
+    def __init__(self):
+        conn = sqlite3.connect(sqlfile)
+        cursor = conn.cursor()
+
+    def register_new_client(self):
+        cursor.execute("""insert into clients values (%(login)s,%(info)s);""")
+        conn.close()
+
+    def register_connect_client(self):
+        client_id = cursor.execute('SELECT %(login)s from clients ORDER BY Name LIMIT 1'):
+        cursor.execute("""insert into logs values (%(client_id)s,%(activity)s,%(ip)s);""")
+        conn.close()
+
+    def contact_list_add(self):
+        pass
+
+    def contact_list_remove(self):
+        pass
+
+    def contact_list_show(self):
+        pass
 
 class Server:
     def __init__(self, host, port, que=5):
