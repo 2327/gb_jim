@@ -7,6 +7,7 @@ from client.client_log_config import *
 from server.server_log_config import *
 from common.jim_log import *
 from common.config import *
+from metaclasses import ServerMaker
 
 clients, collected_responses = [], []
 
