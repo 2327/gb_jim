@@ -47,6 +47,7 @@ class Storage:
     def contact_list_show(self):
         pass
 
+
 class Server:
     def __init__(self, host, port, que=5):
         self.address = (host, port)
@@ -77,7 +78,6 @@ class Server:
             print(client)
             try:
                 byte_request = self.get_request(client)
-                print('f: ', byte_request)
                 response = self.make_response(convert(byte_request))
                 collected_responses.append(response)
                 return collected_responses
@@ -101,7 +101,6 @@ class Server:
         try:
             client.send(byte_response)
         except socket.error:
-            print('socket error')
             pass
 
         return True
@@ -113,23 +112,22 @@ class Server:
                 server_log.debug(f'Send response')
                 clients_rx.remove(client)
             except:
-#                ip_ = client.getpeername()
-                print(f'Reader was disconnected.')
                 clients_rx.remove(client)
-        #        collected_responses = []
         return True
 
     def main_loop(self):
         while True:
             try:
                 client, addr = self.sock.accept()
+                '''
                 ip_ = client.getpeername()
-#                request = convert(self.get_request(client))
-#                print('DDD: ', request)
-#                server_log.debug(f'Received message: {request}')
-#                response = self.make_response(request)
-#                self.send_response(client, response)
-#                server_log.debug(f'Send presence {response}')
+                request = convert(self.get_request(client))
+                print('DDD: ', request)
+                server_log.debug(f'Received message: {request}')
+                response = self.make_response(request)
+                self.send_response(client, response)
+                server_log.debug(f'Send presence {response}')
+                '''
             except OSError as e:
                 pass
             else:
@@ -145,14 +143,9 @@ class Server:
                     pass
 
 
-#                collected_requests = self.get_requests(clients_r, clients)
                 for client in clients_r:
                     byte_request = convert(self.get_request(client))
                     if byte_request != 'empty':
                         collected_responses.append(byte_request)
                         print('receive request: ', collected_responses)
-#                if collected_responses:
-#                    print(collected_responses)
-#                collected_responses=[{"response": 200, "time": time.time(),
-#                            "action": "666", "message": "666"}]
                 self.send_responses(clients_w, collected_responses)
