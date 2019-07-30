@@ -22,7 +22,7 @@ class Client:
     def get_connect(self):
         self.sock = socket.socket()
         self.sock.setblocking(True)
-        self.sock.settimeout(2)
+        self.sock.settimeout(0.2)
 
         while True:
             try:
@@ -42,8 +42,11 @@ class Client:
     def send_request(self, request):
         if request == 'presence':
             request = {"action": "presence", "time": time.time(), "client": self.client_name}
-
+        elif request == 'get_contacts':
+            print('1')
+            request = {"action": "get_contacts", "time": time.time(), "client": self.client_name}
         byte_request = convert(request)
+        print('2', byte_request)
         self.sock.send(byte_request)
         client_log.debug(f'Successfully sent message: {byte_request}')
 

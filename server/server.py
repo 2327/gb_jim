@@ -77,6 +77,9 @@ class Server:
         elif 'action' in request and request['action'] == 'broadcast_message':
             response = {"response": 200, "time": time.time(),
                         "action": request['action'], "message": request['message']}
+        elif 'action' in request and request['action'] == 'get_contacts':
+            print('1')
+            response = {"response": "202", "alert": "[‘nick_1’, ‘nick_2’]"}
         else:
             if request:
                 response = {"response": 200, "time": time.time(),

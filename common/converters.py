@@ -12,6 +12,7 @@ def convert(data):
                 result = 'empty'
 #                result = dict({"action": "empty", "message": "received nothing..."})
             else:
+                print(result)
                 result = json.loads(result)
         except TypeError:
             logger.info('wrong data format!')

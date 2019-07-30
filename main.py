@@ -84,20 +84,31 @@ def main(params):
         client_name = input('Enter your name or \'enter\' for anonymous: ')
         if client_name == '':
             client_name = random.randint(1, 101)
-        while True:
-            client = Client(host, port, client_name)
-            client.get_connect()
 
-            try:
-                presence
-            except:
-                client.send_request('presence')
-                presence = '0'
+        client = Client(host, port, client_name)
+        client.get_connect()
 
-#            client.get_response()
-            read = threading.Thread(target=client.get_response, args=())
-            read.start()
-            c += 1
+        try:
+            presence
+        except:
+            client.send_request('presence')
+            print(client.get_response())
+            presence = '0'
+
+        time.sleep(0.1)
+        client.send_request('get_contacts')
+        print(client.get_response())
+
+#        while True:
+#            print(client.get_response())
+#
+#            read = threading.Thread(target=client.get_response, args=())
+#            read.start()
+#            read.join()
+#            time.sleep(1)
+#
+#            c += 1
+
     elif mode == 'write':
         client_name = input('Enter your name or \'enter\' for anonymous: ')
         if client_name == '':
@@ -113,6 +124,8 @@ def main(params):
                 client.get_response()
                 presence = '0'
 
+            client.send_request('get_contacts')
+            print(client.get_response())
             client.send_request(request)
             print(client.get_response())
             c += 1
