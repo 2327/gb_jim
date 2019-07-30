@@ -62,10 +62,8 @@ def cmd_parseargs(params):
 
 @decolog
 def main(params):
-    host, port, mode = params[0], params[1], params[2]
+    host, port, mode, c = params[0], params[1], params[2], 0
 
-    c = 0
-    client_name = random.randint(1,101)
     if mode == 'client':
         while True:
             try:
@@ -83,40 +81,46 @@ def main(params):
                     read.start()
                 print('MSG: ', client.get_response())
     elif mode == 'read':
-#        presence = '0'
-#        presence = {"action": "presence", "client": client_name}
-#        client = Client(host, port)
-#        client.send_request(presence)
-#        response = client.get_response()
-
+        client_name = input('Enter your name or \'enter\' for anonymous: ')
+        if client_name == '':
+            client_name = random.randint(1, 101)
         while True:
-            print('Attempt receive messasge...')
-            client = Client(host, port)
+            client = Client(host, port, client_name)
             client.get_connect()
-            print(client.get_response())
-#            read = threading.Thread(target=client.get_response, args=())
-#            read.start()
+
+            try:
+                presence
+            except:
+                client.send_request('presence')
+                presence = '0'
+
+#            client.get_response()
+            read = threading.Thread(target=client.get_response, args=())
+            read.start()
             c += 1
     elif mode == 'write':
-#        presence = '0'
-#        presence = {"action": "presence", "client": client_name}
-#        client = Client(host, port)
-#        client.get_connect()
-#        client.send_request(presence)
-#        response = client.get_response()
-
-#        if 'action' in response and response['action'] == 'presence':
+        client_name = input('Enter your name or \'enter\' for anonymous: ')
+        if client_name == '':
+            client_name = random.randint(1, 101)
         while c < 30:
             request = {"action": "broadcast_message", "client": client_name, "message": c}
-            client = Client(host, port)
+            client = Client(host, port, client_name)
             client.get_connect()
+            try:
+                presence
+            except:
+                client.send_request('presence')
+                client.get_response()
+                presence = '0'
+
             client.send_request(request)
             print(client.get_response())
             c += 1
         else:
             exit(0)
     else:
-        server = Server(host, port)
+        database = Storage()
+        server = Server(host, port, database)
         server_log.info(f'no arguments. set default {host} [{port}]')
         server.main_loop()
 

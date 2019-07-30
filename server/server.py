@@ -10,8 +10,8 @@ from common.config import *
 import sqlite3
 
 clients, collected_responses = [], []
-sqlfile = os.path.join(os.path.dirname(__file__), "bazon.sqlite3")
-
+#sqlfile = os.path.join(os.path.dirname(__file__), "bazon.sqlite3")
+sqlfile = "bazon.sqlite3"
 
 class Port:
     def __set__(self, instance, value):
@@ -29,13 +29,24 @@ class Storage:
         conn = sqlite3.connect(sqlfile)
         cursor = conn.cursor()
 
-    def register_new_client(self):
-        cursor.execute("""insert into clients values (%(login)s,%(info)s);""")
+    def register_new_client(self, client_id, ip):
+        conn = sqlite3.connect(sqlfile)
+        cursor = conn.cursor()
+        cursor.execute('''INSERT INTO clients (login,information) VALUES (?,?)''', (client_id, ip))
+        conn.commit()
         conn.close()
 
-    def register_connect_client(self):
-        client_id = cursor.execute('SELECT %(login)s from clients ORDER BY Name LIMIT 1'):
-        cursor.execute("""insert into logs values (%(client_id)s,%(activity)s,%(ip)s);""")
+    def register_connect_client(self, client_id, activity, ip):
+        conn = sqlite3.connect(sqlfile)
+        cursor = conn.cursor()
+
+        try:
+            client_id = cursor.execute('''SELECT (login) FROM clients ORDER BY Name LIMIT 1''', client_id)
+        except:
+            self.register_new_client(client_id, ip)
+
+        cursor.execute('''INSERT INTO logs (client_id, activity, ip) VALUES (?,?,?)''', (client_id, activity, ip))
+        conn.commit()
         conn.close()
 
     def contact_list_add(self):
@@ -49,18 +60,20 @@ class Storage:
 
 
 class Server:
-    def __init__(self, host, port, que=5):
+    def __init__(self, host, port, database, que=5):
         self.address = (host, port)
+        self.database = database
         self.sock = socket.socket()
         self.sock.setblocking(False)
         self.sock.settimeout(0.2)
         self.sock.bind(self.address)
         self.sock.listen(que)
 
-    def make_response(self, request):
+    def make_response(self, request, ip):
         server_log.debug(f'Received request {request}')
         if 'action' in request and request['action'] == 'presence':
             response = {"response": 200, "time": time.time(), "action": request['action']}
+            self.database.register_connect_client(request['client'], response['time'], ip)
         elif 'action' in request and request['action'] == 'broadcast_message':
             response = {"response": 200, "time": time.time(),
                         "action": request['action'], "message": request['message']}
@@ -75,7 +88,6 @@ class Server:
 
     def get_requests(self, clients_r, clients):
         for client in clients_r:
-            print(client)
             try:
                 byte_request = self.get_request(client)
                 response = self.make_response(convert(byte_request))
@@ -97,9 +109,11 @@ class Server:
             server_log.debug(f'Socket error {client}')
 
     def send_response(self, client, responses):
+        print(responses)
         byte_response = convert(responses)
         try:
             client.send(byte_response)
+            collected_responses = []
         except socket.error:
             pass
 
@@ -119,6 +133,7 @@ class Server:
         while True:
             try:
                 client, addr = self.sock.accept()
+                ip_ = client.getpeername()[0]
                 '''
                 ip_ = client.getpeername()
                 request = convert(self.get_request(client))
@@ -142,10 +157,9 @@ class Server:
                 except:
                     pass
 
-
                 for client in clients_r:
-                    byte_request = convert(self.get_request(client))
-                    if byte_request != 'empty':
-                        collected_responses.append(byte_request)
-                        print('receive request: ', collected_responses)
+                    request = convert(self.get_request(client))
+                    if request != 'empty':
+                        message = self.make_response(request, ip_)
+                        collected_responses.append(message)
                 self.send_responses(clients_w, collected_responses)

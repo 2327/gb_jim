@@ -14,8 +14,9 @@ import random
 
 
 class Client:
-    def __init__(self, host, port):
+    def __init__(self, host, port, client_name):
         self.address = (host, port)
+        self.client_name = client_name
 
     @decolog
     def get_connect(self):
@@ -39,6 +40,9 @@ class Client:
 
     @decolog
     def send_request(self, request):
+        if request == 'presence':
+            request = {"action": "presence", "time": time.time(), "client": self.client_name}
+
         byte_request = convert(request)
         self.sock.send(byte_request)
         client_log.debug(f'Successfully sent message: {byte_request}')
@@ -49,9 +53,10 @@ class Client:
             client_log.debug('Trying receive response...')
             byte_response = self.sock.recv(size)
             client_log.debug(f'Successfully receive response: {byte_response}')
-            #response = convert(byte_response)
-            response = byte_response
-            print(f'You get message: {OKGREEN}{response}{ENDC}')
+            response = convert(byte_response)
+            if response != 'empty':
+                for message in response['messages']:
+                    print(f'You get message: {OKGREEN}{message}{ENDC}')
         except OSError:
             response = ''
             self.sock.close()
